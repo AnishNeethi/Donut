@@ -1,73 +1,57 @@
-import React, { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { RigidBody } from '@react-three/rapier'
-import { TorusGeometry } from 'three'
+import React, { useRef, useMemo } from 'react'
+import { RigidBody, CuboidCollider } from '@react-three/rapier'
 
 const Donut = ({ position = [0, 0, 0] }) => {
   const donutRef = useRef()
-
-  // Optional: Add some rotation animation while falling
-  useFrame((state) => {
-    if (donutRef.current) {
-      // Subtle rotation for visual appeal
-      donutRef.current.rotation.x += 0.01
-      donutRef.current.rotation.y += 0.005
-    }
-  })
+  
+  // Create random initial rotation for variety in falling
+  const initialRotation = useMemo(() => [
+    Math.random() * Math.PI * 0.5, // Small random tilt
+    Math.random() * Math.PI * 2,   // Random Y rotation
+    Math.random() * Math.PI * 0.5  // Small random tilt
+  ], [])
 
   return (
-    <RigidBody position={position} type="dynamic">
-      <mesh ref={donutRef} castShadow receiveShadow>
-        {/* Torus geometry to create donut shape */}
-        <torusGeometry args={[0.6, 0.25, 8, 16]} />
-        <meshStandardMaterial 
-          color="#D2691E" 
-          roughness={0.3}
-          metalness={0.1}
-        />
-      </mesh>
+    <RigidBody 
+      position={position}
+      rotation={initialRotation}
+      type="dynamic"
+      restitution={0.15} // Very low bounce - donuts are soft
+      friction={0.95} // Very high friction to prevent sliding
+      linearDamping={0.6} // Strong air resistance to slow down
+      angularDamping={0.8} // Strong rotational damping to stop spinning quickly
+      mass={0.8} // Reasonable mass for a donut
+    >
+      {/* Custom collider that matches donut shape better */}
+      <CuboidCollider args={[0.5, 0.3, 0.5]} />
       
-      {/* Pink frosting layer */}
-      <mesh castShadow receiveShadow position={[0, 0.02, 0]}>
-        <torusGeometry args={[0.62, 0.22, 8, 16]} />
-        <meshStandardMaterial 
-          color="#FFB6C1" 
-          roughness={0.2}
-          metalness={0.05}
-        />
-      </mesh>
-      
-      {/* Sprinkles - small colorful cylinders */}
-      <Sprinkles />
+      <group ref={donutRef}>
+        {/* Main donut base */}
+        <mesh castShadow receiveShadow>
+          <torusGeometry args={[0.5, 0.3, 16, 32]} />
+          <meshStandardMaterial 
+            color="#DEB887" // Burlywood - more realistic donut color
+            roughness={0.8}
+            metalness={0.02}
+          />
+        </mesh>
+        
+        {/* White glaze layer - same shape as donut base */}
+        <mesh castShadow receiveShadow position={[0, 0, 0.05]}>
+          <torusGeometry args={[0.53, 0.29, 16.1, 32.1]} />
+          <meshStandardMaterial 
+            color="#FFFFFF" // Pure white glaze
+            roughness={0.05}
+            metalness={0.2}
+            transparent={true}
+            opacity={0.8}
+          />
+        </mesh>
+      </group>
     </RigidBody>
   )
 }
 
-// Component for donut sprinkles
-const Sprinkles = () => {
-  const sprinkleColors = ['#FF69B4', '#00FF00', '#FFFF00', '#FF4500', '#8A2BE2']
-  const sprinkles = []
-  
-  // Generate random sprinkles
-  for (let i = 0; i < 8; i++) {
-    const angle = (i / 8) * Math.PI * 2
-    const radius = 0.3 + Math.random() * 0.3
-    const x = Math.cos(angle) * radius
-    const z = Math.sin(angle) * radius
-    
-    sprinkles.push(
-      <mesh 
-        key={i}
-        position={[x, 0.05, z]}
-        rotation={[Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI]}
-      >
-        <cylinderGeometry args={[0.02, 0.02, 0.1]} />
-        <meshStandardMaterial color={sprinkleColors[i % sprinkleColors.length]} />
-      </mesh>
-    )
-  }
-  
-  return <>{sprinkles}</>
-}
+
 
 export default Donut 
