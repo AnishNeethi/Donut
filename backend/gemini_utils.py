@@ -41,7 +41,7 @@ def analyze_image(image_path):
         image = Image.open(image_path)
 
         response = client.models.generate_content(
-                model="gemini-2.5-pro", contents=[prompt, image]
+                model="gemini-2.5-flash", contents=[prompt, image]
         )
 
         if response.usage_metadata:
