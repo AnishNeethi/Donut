@@ -32,8 +32,8 @@ async def upload_image(
             temp_file_path = temp_file.name
         
         try:
-            # Analyze image using Gemini with aggressive compression (256px max, 60% quality)
-            analysis_result = analyze_image(temp_file_path, max_size=256, quality=60)
+            # Analyze image using Gemini with very aggressive compression (128px max, 50% quality)
+            analysis_result = analyze_image(temp_file_path, max_size=128, quality=50)
             
             # Save to MongoDB with timestamp
             uploads_collection.insert_one({

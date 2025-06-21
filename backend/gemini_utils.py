@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from dotenv import load_dotenv
 from PIL import Image
 from google import genai
@@ -9,7 +10,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
-def compress_image(image_path, max_size=256, quality=60):
+def compress_image(image_path, max_size=128, quality=50):
     """
     Compress an image to reduce file size while maintaining readability.
     
@@ -21,10 +22,11 @@ def compress_image(image_path, max_size=256, quality=60):
     Returns:
         PIL Image object that's been compressed
     """
+    start_time = time.time()
     try:
         # Open the image
         with Image.open(image_path) as img:
-            print(f"Original image: {img.size} ({img.mode})")
+            print(f"[COMPRESSION] Original image: {img.size} ({img.mode})")
             
             # Convert to RGB if necessary (for JPEG compatibility)
             if img.mode in ('RGBA', 'LA', 'P'):
@@ -49,7 +51,7 @@ def compress_image(image_path, max_size=256, quality=60):
             
             # Resize the image
             img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-            print(f"Resized to: {new_width}x{new_height}")
+            print(f"[COMPRESSION] Resized to: {new_width}x{new_height}")
             
             # Compress by saving to bytes with quality setting
             output_buffer = io.BytesIO()
@@ -64,28 +66,33 @@ def compress_image(image_path, max_size=256, quality=60):
             output_buffer.seek(0, 2)  # Seek to end
             compressed_size = output_buffer.tell()
             
-            print(f"File size: {original_size/1024:.1f}KB -> {compressed_size/1024:.1f}KB (quality={quality})")
-            print(f"Compression ratio: {compressed_size/original_size*100:.1f}%")
+            compression_time = time.time() - start_time
+            print(f"[COMPRESSION] File size: {original_size/1024:.1f}KB -> {compressed_size/1024:.1f}KB (quality={quality})")
+            print(f"[COMPRESSION] Compression ratio: {compressed_size/original_size*100:.1f}%")
+            print(f"[COMPRESSION] Compression time: {compression_time*1000:.1f}ms")
             
             return compressed_img
             
     except Exception as e:
-        print(f"[WARNING] Failed to compress image: {e}. Using original image.")
+        print(f"[COMPRESSION ERROR] Failed to compress image: {e}. Using original image.")
         return Image.open(image_path)
 
 
-def analyze_image(image_path, max_size=256, quality=60):
+def analyze_image(image_path, max_size=128, quality=50):
     """
     Analyze a food image with automatic compression for better performance.
     
     Args:
         image_path: Path to the image file
-        max_size: Maximum dimension for compression (default: 256px)
-        quality: JPEG quality for compression (default: 60)
+        max_size: Maximum dimension for compression (default: 128px)
+        quality: JPEG quality for compression (default: 50)
     
     Returns:
         JSON response from Gemini analysis
     """
+    total_start_time = time.time()
+    print(f"[ANALYSIS] Starting image analysis: {image_path}")
+    
     prompt = """
     Analyze this food image and return a JSON response with the following structure:
     {
@@ -116,10 +123,79 @@ def analyze_image(image_path, max_size=256, quality=60):
 
     try:
         # Compress the image with specified parameters
+        compression_start = time.time()
         compressed_image = compress_image(image_path, max_size=max_size, quality=quality)
+        compression_time = time.time() - compression_start
+        print(f"[ANALYSIS] Compression completed in {compression_time*1000:.1f}ms")
 
+        # Send to Gemini
+        gemini_start = time.time()
+        print(f"[ANALYSIS] Sending to Gemini...")
         response = client.models.generate_content(
                 model="gemini-2.5-flash-lite-preview-06-17", contents=[prompt, compressed_image]
+        )
+        gemini_time = time.time() - gemini_start
+        print(f"[ANALYSIS] Gemini response received in {gemini_time*1000:.1f}ms")
+
+        if response.usage_metadata:
+            print(f"[ANALYSIS] Prompt Tokens: {response.usage_metadata.prompt_token_count}")
+            print(f"[ANALYSIS] Output Tokens: {response.usage_metadata.candidates_token_count}")
+            print(f"[ANALYSIS] Total Tokens: {response.usage_metadata.total_token_count}")
+        else:
+            print("[ANALYSIS] Usage metadata not available in this response.")
+
+        response_text = clean_response(response.text)
+
+        # Optional: Try parsing the result as JSON
+        try:
+            total_time = time.time() - total_start_time
+            print(f"[ANALYSIS] Total analysis time: {total_time*1000:.1f}ms")
+            return json.loads(response_text)
+        except json.JSONDecodeError:
+            print("[ANALYSIS WARNING] Gemini returned malformed JSON. Raw response returned.")
+            return {"raw_response": response_text}
+
+    except Exception as e:
+        print(f"[ANALYSIS ERROR] Failed to analyze image: {e}")
+        return {"error": str(e)}
+
+
+def analyze_ingredient(ingredient_name):
+    """
+    Analyze an ingredient and provide pronunciation, common products, and health consensus.
+    
+    Args:
+        ingredient_name: Name of the ingredient to analyze
+    
+    Returns:
+        JSON response with pronunciation, common products, and health consensus
+    """
+    prompt = f"""
+    Analyze the ingredient "{ingredient_name}" and return a JSON response with the following structure:
+    {{
+        "ingredient_name": "{ingredient_name}",
+        "pronunciation": "How to pronounce this ingredient (phonetic spelling)",
+        "common_products": [
+            "List of common food products",
+            "where this ingredient is typically found"
+        ],
+        "health_consensus": {{
+            "safety": "General safety assessment (safe/unsafe/controversial)",
+            "healthiness": "Health assessment (healthy/unhealthy/neutral)",
+            "notes": "Additional health-related notes or warnings",
+            "recommendation": "General recommendation for consumption"
+        }}
+    }}
+
+    Please provide accurate information based on scientific consensus and common knowledge.
+    Focus on food safety and nutritional aspects relevant to consumers.
+    Return only the JSON response, no additional text.
+    """
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite-preview-06-17", 
+            contents=[prompt]
         )
 
         if response.usage_metadata:
@@ -131,7 +207,7 @@ def analyze_image(image_path, max_size=256, quality=60):
 
         response_text = clean_response(response.text)
 
-        # Optional: Try parsing the result as JSON
+        # Try parsing the result as JSON
         try:
             return json.loads(response_text)
         except json.JSONDecodeError:
@@ -139,7 +215,7 @@ def analyze_image(image_path, max_size=256, quality=60):
             return {"raw_response": response_text}
 
     except Exception as e:
-        print(f"[ERROR] Failed to analyze image: {e}")
+        print(f"[ERROR] Failed to analyze ingredient: {e}")
         return {"error": str(e)}
 
 
