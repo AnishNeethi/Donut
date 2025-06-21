@@ -2,14 +2,15 @@ import os
 import json
 from dotenv import load_dotenv
 from google import genai
+from PIL import Image
+import io
 
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-
 def analyze_image(image_bytes: bytes):
     """
-    Analyzes image bytes directly.
+    Analyzes image bytes directly by loading them into a PIL Image object.
 
     Args:
         image_bytes: The raw bytes of the image to be analyzed.
@@ -46,13 +47,10 @@ def analyze_image(image_bytes: bytes):
     """
 
     try:
-        image_part = {
-            "mime_type": "image/jpeg", # Assume frontend sends JPEG
-            "data": image_bytes,
-        }
+        image = Image.open(io.BytesIO(image_bytes))
         
         response = client.models.generate_content(
-                model="gemini-2.5-flash-lite-preview-06-17", contents=[prompt, image_part]
+                model="gemini-2.5-flash-lite-preview-06-17", contents=[prompt, image]
         )
 
         response_text = clean_response(response.text)
@@ -73,25 +71,25 @@ def analyze_ingredient(ingredient_name):
     Analyze an ingredient and provide pronunciation, common products, and health consensus.
     """
     prompt = f"""
-    Analyze the ingredient "{ingredient_name}" and return a JSON response with the following structure:
+    Analyze the food ingredient "{ingredient_name}" and return a JSON response with the following structure.
+    Use easily readable phonetics (e.g., "SO-dee-um BEN-zoh-ate").
+    Do NOT use paragraphs; keep all descriptions brief and to the point.
+    Add a relevant emoji (✅, ⚠️, ❌) to the beginning of the text for 'safety_status' and 'health_concerns'.
+
+    Example for "Sodium Benzoate":
     {{
-        "ingredient_name": "{ingredient_name}",
-        "pronunciation": "How to pronounce this ingredient (phonetic spelling)",
-        "common_products": [
-            "List of common food products",
-            "where this ingredient is typically found"
-        ],
-        "health_consensus": {{
-            "safety": "General safety assessment (safe/unsafe/controversial)",
-            "healthiness": "Health assessment (healthy/unhealthy/neutral)",
-            "notes": "Additional health-related notes or warnings",
-            "recommendation": "General recommendation for consumption"
-        }}
+        "name": "Sodium Benzoate",
+        "pronunciation": "SO-dee-um BEN-zoh-ate",
+        "commonly_found_in": "Soda, salad dressings, fruit juices",
+        "purpose": "Preservative to prevent spoilage from bacteria and fungi.",
+        "natural_or_synthetic": "Synthetic",
+        "safety_status": "✅ Generally recognized as safe (GRAS) by the FDA in small doses.",
+        "health_concerns": "⚠️ Can convert to benzene (a carcinogen) in the presence of vitamin C. May be linked to hyperactivity in children.",
+        "recommended_intake": "Limit intake, especially in combination with vitamin C."
     }}
 
-    Please provide accurate information based on scientific consensus and common knowledge.
-    Focus on food safety and nutritional aspects relevant to consumers.
-    Return only the JSON response, no additional text.
+    Now, provide the analysis for the ingredient: "{ingredient_name}".
+    Return ONLY the JSON response, with no additional text.
     """
 
     try:
