@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import Landing from './components/Landing'
 import DonutDemo from './components/DonutDemo'
 import AuthPage from './components/AuthPage'
 import './App.css'
@@ -7,19 +8,10 @@ import './App.css'
 function App() {
   return (
     <Router>
-      <Landing />
       <div className="App">
-        <nav style={{ padding: '20px', backgroundColor: '#f0f0f0' }}>
-          <Link to="/" style={{ marginRight: '20px', textDecoration: 'none', color: '#333' }}>
-            Home (Donut Demo)
-          </Link>
-          <Link to="/auth" style={{ textDecoration: 'none', color: '#333' }}>
-            Image Analysis
-          </Link>
-        </nav>
-
         <Routes>
-          <Route path="/" element={<DonutDemo />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/donut-demo" element={<DonutDemo />} />
           <Route path="/auth" element={<AuthPage />} />
         </Routes>
       </div>
