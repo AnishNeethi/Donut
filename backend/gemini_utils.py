@@ -1,15 +1,32 @@
 import os
 import json
 from dotenv import load_dotenv
-from PIL import Image
 from google import genai
+from PIL import Image
+import io
 
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
+def analyze_image(image_bytes: bytes):
+    """
+    Analyzes image bytes directly by loading them into a PIL Image object.
 
-def analyze_image(image_path):
-    prompt = """
+    Args:
+        image_bytes: The raw bytes of the image to be analyzed.
+    
+    Returns:
+        JSON response from Gemini analysis.
+    """
+    print("\n--- [START IMAGE ANALYSIS] ---")
+    try:
+        print(f"[ANALYSIS] Received {len(image_bytes) / 1024:.2f} KB of image data.")
+        
+        print("[ANALYSIS] Step 1: Loading bytes into a PIL Image object...")
+        image = Image.open(io.BytesIO(image_bytes))
+        print(f"[ANALYSIS] Step 1 SUCCESS: Image loaded. Format: {image.format}, Size: {image.size}")
+        
+        prompt = """
     Analyze this food image and return a JSON response with the following structure:
     {
         "food_name": "Name of the food item",
@@ -37,31 +54,72 @@ def analyze_image(image_path):
     Return only the JSON response, no additional text.
     """
 
-    try:
-        image = Image.open(image_path)
-
+        print("[ANALYSIS] Step 2: Sending request to Google Gemini API...")
         response = client.models.generate_content(
-                model="gemini-2.5-pro", contents=[prompt, image]
+                model="gemini-2.5-flash-lite-preview-06-17", contents=[prompt, image]
         )
-
-        if response.usage_metadata:
-            print(f"Prompt Tokens: {response.usage_metadata.prompt_token_count}")
-            print(f"Output Tokens: {response.usage_metadata.candidates_token_count}")
-            print(f"Total Tokens: {response.usage_metadata.total_token_count}")
-        else:
-            print("Usage metadata not available in this response.")
+        print("[ANALYSIS] Step 2 SUCCESS: Received response from Gemini.")
 
         response_text = clean_response(response.text)
+        print("[ANALYSIS] Step 3: Response content cleaned successfully.")
 
-        # Optional: Try parsing the result as JSON
         try:
-            return json.loads(response_text)
+            result = json.loads(response_text)
+            print("[ANALYSIS] Step 4 SUCCESS: JSON parsed. Analysis complete.")
+            print("--- [END IMAGE ANALYSIS] ---\n")
+            return result
         except json.JSONDecodeError:
-            print("[WARNING] Gemini returned malformed JSON. Raw response returned.")
+            print("[ANALYSIS ERROR] Gemini returned malformed JSON.")
             return {"raw_response": response_text}
 
     except Exception as e:
-        print(f"[ERROR] Failed to analyze image: {e}")
+        print(f"[ANALYSIS CRITICAL ERROR] An exception occurred: {e}")
+        print("--- [END IMAGE ANALYSIS WITH ERROR] ---\n")
+        return {"error": str(e)}
+
+
+def analyze_ingredient(ingredient_name):
+    """
+    Analyze an ingredient and provide pronunciation, common products, and health consensus.
+    """
+    prompt = f"""
+    Analyze the food ingredient "{ingredient_name}" and return a JSON response with the following structure.
+    Use easily readable phonetics (e.g., "SO-dee-um BEN-zoh-ate").
+    Do NOT use paragraphs; keep all descriptions brief and to the point.
+    Add a relevant emoji (✅, ⚠️, ❌) to the beginning of the text for 'safety_status' and 'health_concerns'.
+
+    Example for "Sodium Benzoate":
+    {{
+        "name": "Sodium Benzoate",
+        "pronunciation": "SO-dee-um BEN-zoh-ate",
+        "commonly_found_in": "Soda, salad dressings, fruit juices",
+        "purpose": "Preservative to prevent spoilage from bacteria and fungi.",
+        "natural_or_synthetic": "Synthetic",
+        "safety_status": "✅ Generally recognized as safe (GRAS) by the FDA in small doses.",
+        "health_concerns": "⚠️ Can convert to benzene (a carcinogen) in the presence of vitamin C. May be linked to hyperactivity in children.",
+        "recommended_intake": "Limit intake, especially in combination with vitamin C."
+    }}
+
+    Now, provide the analysis for the ingredient: "{ingredient_name}".
+    Return ONLY the JSON response, with no additional text.
+    """
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite-preview-06-17", 
+            contents=[prompt]
+        )
+
+        response_text = clean_response(response.text)
+
+        try:
+            return json.loads(response_text)
+        except json.JSONDecodeError:
+            print("[WARNING] Gemini returned malformed JSON.")
+            return {"raw_response": response_text}
+
+    except Exception as e:
+        print(f"[ERROR] Failed to analyze ingredient: {e}")
         return {"error": str(e)}
 
 
