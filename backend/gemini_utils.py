@@ -1,16 +1,25 @@
 import os
 import json
 import time
+import logging
+import sys
 from dotenv import load_dotenv
 from PIL import Image
 from google import genai
 import io
 
+# Configure logging to output to stdout for Render
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    stream=sys.stdout,
+)
+
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
-def compress_image(image_path, max_size=128, quality=50):
+def compress_image(image_path, max_size=96, quality=40):
     """
     Compress an image to reduce file size while maintaining readability.
     
@@ -26,7 +35,7 @@ def compress_image(image_path, max_size=128, quality=50):
     try:
         # Open the image
         with Image.open(image_path) as img:
-            print(f"[COMPRESSION] Original image: {img.size} ({img.mode})")
+            logging.info(f"[COMPRESSION] Original image: {img.size} ({img.mode})")
             
             # Convert to RGB if necessary (for JPEG compatibility)
             if img.mode in ('RGBA', 'LA', 'P'):
@@ -51,7 +60,7 @@ def compress_image(image_path, max_size=128, quality=50):
             
             # Resize the image
             img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-            print(f"[COMPRESSION] Resized to: {new_width}x{new_height}")
+            logging.info(f"[COMPRESSION] Resized to: {new_width}x{new_height}")
             
             # Compress by saving to bytes with quality setting
             output_buffer = io.BytesIO()
@@ -67,31 +76,31 @@ def compress_image(image_path, max_size=128, quality=50):
             compressed_size = output_buffer.tell()
             
             compression_time = time.time() - start_time
-            print(f"[COMPRESSION] File size: {original_size/1024:.1f}KB -> {compressed_size/1024:.1f}KB (quality={quality})")
-            print(f"[COMPRESSION] Compression ratio: {compressed_size/original_size*100:.1f}%")
-            print(f"[COMPRESSION] Compression time: {compression_time*1000:.1f}ms")
+            logging.info(f"[COMPRESSION] File size: {original_size/1024:.1f}KB -> {compressed_size/1024:.1f}KB (quality={quality})")
+            logging.info(f"[COMPRESSION] Compression ratio: {compressed_size/original_size*100:.1f}%")
+            logging.info(f"[COMPRESSION] Compression time: {compression_time*1000:.1f}ms")
             
             return compressed_img
             
     except Exception as e:
-        print(f"[COMPRESSION ERROR] Failed to compress image: {e}. Using original image.")
+        logging.error(f"[COMPRESSION ERROR] Failed to compress image: {e}. Using original image.")
         return Image.open(image_path)
 
 
-def analyze_image(image_path, max_size=128, quality=50):
+def analyze_image(image_path, max_size=96, quality=40):
     """
     Analyze a food image with automatic compression for better performance.
     
     Args:
         image_path: Path to the image file
-        max_size: Maximum dimension for compression (default: 128px)
-        quality: JPEG quality for compression (default: 50)
+        max_size: Maximum dimension for compression (default: 96px)
+        quality: JPEG quality for compression (default: 40)
     
     Returns:
         JSON response from Gemini analysis
     """
     total_start_time = time.time()
-    print(f"[ANALYSIS] Starting image analysis: {image_path}")
+    logging.info(f"[ANALYSIS] Starting image analysis: {image_path}")
     
     prompt = """
     Analyze this food image and return a JSON response with the following structure:
@@ -126,37 +135,37 @@ def analyze_image(image_path, max_size=128, quality=50):
         compression_start = time.time()
         compressed_image = compress_image(image_path, max_size=max_size, quality=quality)
         compression_time = time.time() - compression_start
-        print(f"[ANALYSIS] Compression completed in {compression_time*1000:.1f}ms")
+        logging.info(f"[ANALYSIS] Compression completed in {compression_time*1000:.1f}ms")
 
         # Send to Gemini
         gemini_start = time.time()
-        print(f"[ANALYSIS] Sending to Gemini...")
+        logging.info(f"[ANALYSIS] Sending to Gemini...")
         response = client.models.generate_content(
                 model="gemini-2.5-flash-lite-preview-06-17", contents=[prompt, compressed_image]
         )
         gemini_time = time.time() - gemini_start
-        print(f"[ANALYSIS] Gemini response received in {gemini_time*1000:.1f}ms")
+        logging.info(f"[ANALYSIS] Gemini response received in {gemini_time*1000:.1f}ms")
 
         if response.usage_metadata:
-            print(f"[ANALYSIS] Prompt Tokens: {response.usage_metadata.prompt_token_count}")
-            print(f"[ANALYSIS] Output Tokens: {response.usage_metadata.candidates_token_count}")
-            print(f"[ANALYSIS] Total Tokens: {response.usage_metadata.total_token_count}")
+            logging.info(f"[ANALYSIS] Prompt Tokens: {response.usage_metadata.prompt_token_count}")
+            logging.info(f"[ANALYSIS] Output Tokens: {response.usage_metadata.candidates_token_count}")
+            logging.info(f"[ANALYSIS] Total Tokens: {response.usage_metadata.total_token_count}")
         else:
-            print("[ANALYSIS] Usage metadata not available in this response.")
+            logging.info("[ANALYSIS] Usage metadata not available in this response.")
 
         response_text = clean_response(response.text)
 
         # Optional: Try parsing the result as JSON
         try:
             total_time = time.time() - total_start_time
-            print(f"[ANALYSIS] Total analysis time: {total_time*1000:.1f}ms")
+            logging.info(f"[ANALYSIS] Total analysis time: {total_time*1000:.1f}ms")
             return json.loads(response_text)
         except json.JSONDecodeError:
-            print("[ANALYSIS WARNING] Gemini returned malformed JSON. Raw response returned.")
+            logging.warning("[ANALYSIS WARNING] Gemini returned malformed JSON. Raw response returned.")
             return {"raw_response": response_text}
 
     except Exception as e:
-        print(f"[ANALYSIS ERROR] Failed to analyze image: {e}")
+        logging.error(f"[ANALYSIS ERROR] Failed to analyze image: {e}")
         return {"error": str(e)}
 
 
@@ -199,11 +208,11 @@ def analyze_ingredient(ingredient_name):
         )
 
         if response.usage_metadata:
-            print(f"Prompt Tokens: {response.usage_metadata.prompt_token_count}")
-            print(f"Output Tokens: {response.usage_metadata.candidates_token_count}")
-            print(f"Total Tokens: {response.usage_metadata.total_token_count}")
+            logging.info(f"Prompt Tokens: {response.usage_metadata.prompt_token_count}")
+            logging.info(f"Output Tokens: {response.usage_metadata.candidates_token_count}")
+            logging.info(f"Total Tokens: {response.usage_metadata.total_token_count}")
         else:
-            print("Usage metadata not available in this response.")
+            logging.info("Usage metadata not available in this response.")
 
         response_text = clean_response(response.text)
 
@@ -211,11 +220,11 @@ def analyze_ingredient(ingredient_name):
         try:
             return json.loads(response_text)
         except json.JSONDecodeError:
-            print("[WARNING] Gemini returned malformed JSON. Raw response returned.")
+            logging.warning("[WARNING] Gemini returned malformed JSON. Raw response returned.")
             return {"raw_response": response_text}
 
     except Exception as e:
-        print(f"[ERROR] Failed to analyze ingredient: {e}")
+        logging.error(f"[ERROR] Failed to analyze ingredient: {e}")
         return {"error": str(e)}
 
 

@@ -11,6 +11,11 @@ const AuthPage = () => {
   const [analysisResult, setAnalysisResult] = useState('');
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedIngredient, setSelectedIngredient] = useState(null);
+  const [isIngredientPopupOpen, setIsIngredientPopupOpen] = useState(false);
+  const [ingredientData, setIngredientData] = useState(null);
+  const [ingredientLoading, setIngredientLoading] = useState(false);
+  const [ingredientError, setIngredientError] = useState(null);
 
   const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
@@ -145,6 +150,108 @@ const AuthPage = () => {
     setLoading(false);
   };
 
+  const handleIngredientClick = (ingredient) => {
+    setSelectedIngredient(ingredient);
+    setIsIngredientPopupOpen(true);
+    fetchIngredientData(ingredient);
+  };
+
+  const closeIngredientPopup = () => {
+    setIsIngredientPopupOpen(false);
+    setSelectedIngredient(null);
+    setIngredientData(null);
+    setIngredientError(null);
+  };
+
+  const fetchIngredientData = async (ingredient) => {
+    setIngredientLoading(true);
+    setIngredientError(null);
+    
+    try {
+      const response = await fetch(`${API_BASE}/analyze-ingredient`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ingredient_name: ingredient }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setIngredientData(data);
+      } else {
+        setIngredientError(data.detail || 'Failed to analyze ingredient');
+      }
+    } catch (error) {
+      setIngredientError('Error analyzing ingredient');
+    }
+    
+    setIngredientLoading(false);
+  };
+
+  const renderAnalysisResult = (result) => {
+    if (typeof result === 'string') {
+      try {
+        result = JSON.parse(result);
+      } catch (e) {
+        return <pre style={{ backgroundColor: '#000000', color: '#ffffff', border: '1px solid #ffffff', padding: '10px', overflow: 'auto' }}>
+          {result}
+        </pre>;
+      }
+    }
+
+    return (
+      <div style={{ backgroundColor: '#000000', color: '#ffffff', border: '1px solid #ffffff', padding: '15px', borderRadius: '5px' }}>
+        <h4 style={{ color: '#ff6b6b', marginTop: 0 }}>Food: {result.food_name}</h4>
+        
+        <div style={{ marginBottom: '20px' }}>
+          <h5 style={{ color: '#4ecdc4' }}>Nutrition Data:</h5>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+            {result.nutrition_data && Object.entries(result.nutrition_data).map(([key, value]) => (
+              <div key={key} style={{ backgroundColor: '#1a1a1a', padding: '8px', borderRadius: '3px' }}>
+                <strong>{key.replace(/_/g, ' ').toUpperCase()}:</strong> {value}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h5 style={{ color: '#4ecdc4' }}>Ingredients:</h5>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {result.ingredients && result.ingredients.map((ingredient, index) => (
+              <button
+                key={index}
+                onClick={() => handleIngredientClick(ingredient)}
+                style={{
+                  backgroundColor: '#2a2a2a',
+                  color: '#ffffff',
+                  border: '1px solid #4ecdc4',
+                  padding: '5px 10px',
+                  borderRadius: '15px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  transition: 'all 0.2s',
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#4ecdc4';
+                  e.target.style.color = '#000000';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#2a2a2a';
+                  e.target.style.color = '#ffffff';
+                }}
+              >
+                {ingredient}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (!isLoggedIn) {
     return (
       <div style={{ padding: '20px', maxWidth: '400px', margin: '0 auto' }}>
@@ -257,10 +364,7 @@ const AuthPage = () => {
 
           {analysisResult && (
             <div style={{ marginTop: '20px' }}>
-              <h4>Analysis Result:</h4>
-              <pre style={{ backgroundColor: '#000000', color: '#ffffff', border: '1px solid #ffffff', padding: '10px', overflow: 'auto' }}>
-                {analysisResult}
-              </pre>
+              {renderAnalysisResult(analysisResult)}
             </div>
           )}
         </div>
@@ -279,9 +383,7 @@ const AuthPage = () => {
                 history.map((item, index) => (
                   <div key={index} style={{ border: '1px solid #ccc', margin: '10px 0', padding: '10px' }}>
                     <h4>File: {item.filename}</h4>
-                    <pre style={{ backgroundColor: '#000000', color: '#ffffff', border: '1px solid #ffffff', padding: '10px', overflow: 'auto' }}>
-                      {JSON.stringify(item.analysis, null, 2)}
-                    </pre>
+                    {renderAnalysisResult(JSON.stringify(item.analysis, null, 2))}
                   </div>
                 ))
               )}
@@ -293,6 +395,131 @@ const AuthPage = () => {
       {message && (
         <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#000000' }}>
           {message}
+        </div>
+      )}
+
+      {/* Ingredient Popup */}
+      {isIngredientPopupOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: '#1a1a1a',
+            color: '#ffffff',
+            padding: '30px',
+            borderRadius: '10px',
+            maxWidth: '500px',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            border: '2px solid #333',
+            position: 'relative',
+          }}>
+            {/* Close button */}
+            <button
+              onClick={closeIngredientPopup}
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '15px',
+                background: 'none',
+                border: 'none',
+                color: '#ffffff',
+                fontSize: '24px',
+                cursor: 'pointer',
+                padding: '5px',
+              }}
+            >
+              ×
+            </button>
+
+            <h2 style={{ marginTop: 0, marginBottom: '20px', color: '#ff6b6b' }}>
+              {selectedIngredient}
+            </h2>
+
+            {ingredientLoading && (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <p>Analyzing ingredient...</p>
+              </div>
+            )}
+
+            {ingredientError && (
+              <div style={{ 
+                backgroundColor: '#ff4444', 
+                color: '#ffffff', 
+                padding: '10px', 
+                borderRadius: '5px',
+                marginBottom: '15px'
+              }}>
+                {ingredientError}
+              </div>
+            )}
+
+            {ingredientData && (
+              <div>
+                {/* Pronunciation */}
+                <div style={{ marginBottom: '20px' }}>
+                  <h3 style={{ color: '#4ecdc4', marginBottom: '5px' }}>Pronunciation</h3>
+                  <p style={{ fontSize: '18px', fontStyle: 'italic' }}>
+                    {ingredientData.pronunciation}
+                  </p>
+                </div>
+
+                {/* Common Products */}
+                <div style={{ marginBottom: '20px' }}>
+                  <h3 style={{ color: '#4ecdc4', marginBottom: '10px' }}>Common Products</h3>
+                  <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                    {ingredientData.common_products.map((product, index) => (
+                      <li key={index} style={{ marginBottom: '5px' }}>{product}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Health Consensus */}
+                <div>
+                  <h3 style={{ color: '#4ecdc4', marginBottom: '10px' }}>Health Consensus</h3>
+                  <div style={{ backgroundColor: '#2a2a2a', padding: '15px', borderRadius: '5px' }}>
+                    <div style={{ marginBottom: '10px' }}>
+                      <strong>Safety:</strong> 
+                      <span style={{ 
+                        color: ingredientData.health_consensus.safety === 'safe' ? '#4caf50' : 
+                               ingredientData.health_consensus.safety === 'unsafe' ? '#f44336' : '#ff9800',
+                        marginLeft: '10px'
+                      }}>
+                        {ingredientData.health_consensus.safety}
+                      </span>
+                    </div>
+                    <div style={{ marginBottom: '10px' }}>
+                      <strong>Healthiness:</strong> 
+                      <span style={{ 
+                        color: ingredientData.health_consensus.healthiness === 'healthy' ? '#4caf50' : 
+                               ingredientData.health_consensus.healthiness === 'unhealthy' ? '#f44336' : '#ff9800',
+                        marginLeft: '10px'
+                      }}>
+                        {ingredientData.health_consensus.healthiness}
+                      </span>
+                    </div>
+                    {ingredientData.health_consensus.notes && (
+                      <div style={{ marginBottom: '10px' }}>
+                        <strong>Notes:</strong> {ingredientData.health_consensus.notes}
+                      </div>
+                    )}
+                    <div>
+                      <strong>Recommendation:</strong> {ingredientData.health_consensus.recommendation}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
