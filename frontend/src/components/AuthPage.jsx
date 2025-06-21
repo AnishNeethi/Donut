@@ -198,7 +198,7 @@ const AuthPage = () => {
         </form>
 
         {message && (
-          <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#f0f0f0' }}>
+          <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#000000' }}>
             {message}
           </div>
         )}
@@ -258,7 +258,7 @@ const AuthPage = () => {
           {analysisResult && (
             <div style={{ marginTop: '20px' }}>
               <h4>Analysis Result:</h4>
-              <pre style={{ backgroundColor: '#f5f5f5', padding: '10px', overflow: 'auto' }}>
+              <pre style={{ backgroundColor: '#000000', color: '#ffffff', border: '1px solid #ffffff', padding: '10px', overflow: 'auto' }}>
                 {analysisResult}
               </pre>
             </div>
@@ -279,7 +279,7 @@ const AuthPage = () => {
                 history.map((item, index) => (
                   <div key={index} style={{ border: '1px solid #ccc', margin: '10px 0', padding: '10px' }}>
                     <h4>File: {item.filename}</h4>
-                    <pre style={{ backgroundColor: '#f5f5f5', padding: '10px', overflow: 'auto' }}>
+                    <pre style={{ backgroundColor: '#000000', color: '#ffffff', border: '1px solid #ffffff', padding: '10px', overflow: 'auto' }}>
                       {JSON.stringify(item.analysis, null, 2)}
                     </pre>
                   </div>
@@ -291,7 +291,7 @@ const AuthPage = () => {
       )}
 
       {message && (
-        <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#f0f0f0' }}>
+        <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#000000' }}>
           {message}
         </div>
       )}
