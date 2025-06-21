@@ -21,35 +21,26 @@ async def upload_image(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     try:
-        # Extract token and decode user email
         token = credentials.credentials
         current_user = decode_access_token(token)
         if not current_user:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-        # Read uploaded file content
+        # Read image bytes from the uploaded file (now compressed by the frontend)
         file_content = await file.read()
         
-        # Save to temp file for analysis
-        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file.filename.split('.')[-1]}") as temp_file:
-            temp_file.write(file_content)
-            temp_file_path = temp_file.name
-        
-        try:
-            # Analyze image using Gemini with maximum compression for speed (96px max, 40% quality)
-            analysis_result = analyze_image(temp_file_path, max_size=96, quality=40)
+        # Directly pass the bytes to the analysis function
+        analysis_result = analyze_image(file_content)
             
-            # Save to MongoDB with timestamp
-            uploads_collection.insert_one({
-                "user_email": current_user,
-                "filename": file.filename,
-                "analysis": analysis_result,
-                "timestamp": datetime.utcnow()
-            })
+        # Save to MongoDB with timestamp
+        uploads_collection.insert_one({
+            "user_email": current_user,
+            "filename": file.filename,
+            "analysis": analysis_result,
+            "timestamp": datetime.utcnow()
+        })
             
-            return JSONResponse(content=analysis_result)
-        finally:
-            os.unlink(temp_file_path)
+        return JSONResponse(content=analysis_result)
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)

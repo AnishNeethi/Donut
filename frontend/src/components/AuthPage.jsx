@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import imageCompression from 'browser-image-compression';
 
 const AuthPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -100,10 +101,23 @@ const AuthPage = () => {
     }
 
     setLoading(true);
-    const formData = new FormData();
-    formData.append('file', selectedFile);
+    setMessage('Compressing image...');
+
+    const options = {
+      maxSizeMB: 0.07, // Aim for ~70KB
+      maxWidthOrHeight: 512, // Resize to a max of 512px
+      useWebWorker: true,
+      fileType: 'image/jpeg',
+    };
 
     try {
+      const compressedFile = await imageCompression(selectedFile, options);
+      setMessage('Uploading compressed image...');
+
+      const formData = new FormData();
+      // Important: use the compressed file and give it a name
+      formData.append('file', compressedFile, compressedFile.name);
+
       const response = await fetch(`${API_BASE}/upload`, {
         method: 'POST',
         headers: {
@@ -121,9 +135,11 @@ const AuthPage = () => {
         setMessage(data.error || 'Upload failed');
       }
     } catch (error) {
-      setMessage('Error during upload');
+      console.error('Compression or Upload Error:', error);
+      setMessage('An error occurred during compression or upload.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleGetHistory = async () => {
