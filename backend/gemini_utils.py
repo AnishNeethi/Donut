@@ -9,7 +9,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
-def compress_image(image_path, max_size=512, quality=70):
+def compress_image(image_path, max_size=256, quality=60):
     """
     Compress an image to reduce file size while maintaining readability.
     
@@ -24,6 +24,8 @@ def compress_image(image_path, max_size=512, quality=70):
     try:
         # Open the image
         with Image.open(image_path) as img:
+            print(f"Original image: {img.size} ({img.mode})")
+            
             # Convert to RGB if necessary (for JPEG compatibility)
             if img.mode in ('RGBA', 'LA', 'P'):
                 # Create a white background for transparent images
@@ -37,30 +39,17 @@ def compress_image(image_path, max_size=512, quality=70):
             
             original_width, original_height = img.size
             
-            # Only resize if the image is larger than max_size in either dimension
-            if original_width <= max_size and original_height <= max_size:
-                # Image is already small enough, just compress quality
-                new_width, new_height = original_width, original_height
-                print(f"Image already small ({original_width}x{original_height}), only compressing quality")
+            # Always resize to max_size for maximum compression
+            if original_width > original_height:
+                new_width = max_size
+                new_height = int(original_height * (max_size / original_width))
             else:
-                # Calculate new dimensions while maintaining aspect ratio
-                if original_width > original_height:
-                    if original_width > max_size:
-                        new_width = max_size
-                        new_height = int(original_height * (max_size / original_width))
-                    else:
-                        new_width, new_height = original_width, original_height
-                else:
-                    if original_height > max_size:
-                        new_height = max_size
-                        new_width = int(original_width * (max_size / original_height))
-                    else:
-                        new_width, new_height = original_width, original_height
-                
-                # Resize if necessary
-                if (new_width, new_height) != (original_width, original_height):
-                    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-                    print(f"Image resized: {original_width}x{original_height} -> {new_width}x{new_height}")
+                new_height = max_size
+                new_width = int(original_width * (max_size / original_height))
+            
+            # Resize the image
+            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            print(f"Resized to: {new_width}x{new_height}")
             
             # Compress by saving to bytes with quality setting
             output_buffer = io.BytesIO()
@@ -75,7 +64,8 @@ def compress_image(image_path, max_size=512, quality=70):
             output_buffer.seek(0, 2)  # Seek to end
             compressed_size = output_buffer.tell()
             
-            print(f"Compression: {original_size/1024:.1f}KB -> {compressed_size/1024:.1f}KB (quality={quality})")
+            print(f"File size: {original_size/1024:.1f}KB -> {compressed_size/1024:.1f}KB (quality={quality})")
+            print(f"Compression ratio: {compressed_size/original_size*100:.1f}%")
             
             return compressed_img
             
@@ -84,14 +74,14 @@ def compress_image(image_path, max_size=512, quality=70):
         return Image.open(image_path)
 
 
-def analyze_image(image_path, max_size=512, quality=70):
+def analyze_image(image_path, max_size=256, quality=60):
     """
     Analyze a food image with automatic compression for better performance.
     
     Args:
         image_path: Path to the image file
-        max_size: Maximum dimension for compression (default: 512px)
-        quality: JPEG quality for compression (default: 70)
+        max_size: Maximum dimension for compression (default: 256px)
+        quality: JPEG quality for compression (default: 60)
     
     Returns:
         JSON response from Gemini analysis
