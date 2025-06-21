@@ -1,0 +1,223 @@
+.landing-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 50%, #FFB6C1 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Hamburger Menu Button */
+.hamburger-menu {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.hamburger-line {
+  width: 25px;
+  height: 3px;
+  background-color: #000;
+  margin: 3px 0;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+
+.hamburger-menu:hover .hamburger-line {
+  background-color: #333;
+}
+
+/* Main Content */
+.main-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.app-title {
+  font-size: 5.5rem;
+  font-weight: normal;
+  color: #000;
+  text-align: center;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Camera Button */
+.camera-button {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 70px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 3px solid #FFB6C1;
+  border-radius: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.camera-button:hover {
+  background-color: #fff;
+  border-color: #000;
+  transform: translateX(-50%) scale(1.1);
+}
+
+.camera-button:hover svg {
+  color: #000;
+}
+
+.camera-button svg {
+  width: 36px;
+  height: 36px;
+  color: #FFB6C1;
+}
+
+/* Slide-in Menu */
+.slide-menu {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 300px;
+  height: 100vh;
+  background-color: #000;
+  transition: left 0.3s ease-in-out;
+  z-index: 999;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.slide-menu.open {
+  left: 0;
+}
+
+.menu-content {
+  padding: 80px 20px 20px;
+  height: 100%;
+}
+
+.menu-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-nav li {
+  margin-bottom: 25px;
+}
+
+.menu-nav a {
+  color: #FFB6C1;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 500;
+  display: block;
+  padding: 12px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.menu-nav a:hover {
+  background-color: rgba(255, 182, 193, 0.1);
+  color: #FFC0CB;
+  transform: translateX(5px);
+}
+
+/* Menu Overlay */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  transition: opacity 0.3s ease;
+}
+
+/* Global styles to prevent scrolling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .app-title {
+    font-size: 4.2rem;
+  }
+  
+  .slide-menu {
+    width: 250px;
+    left: -250px;
+  }
+  
+  .hamburger-menu {
+    top: 15px;
+    left: 15px;
+  }
+  
+  .camera-button {
+    bottom: 40px;
+    width: 120px;
+    height: 60px;
+    border-radius: 30px;
+  }
+  
+  .camera-button svg {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-title {
+    font-size: 3.5rem;
+  }
+  
+  .slide-menu {
+    width: 200px;
+    left: -200px;
+  }
+  
+  .menu-nav a {
+    font-size: 1rem;
+    padding: 10px 12px;
+  }
+  
+  .camera-button {
+    bottom: 30px;
+    width: 110px;
+    height: 55px;
+    border-radius: 27px;
+  }
+  
+  .camera-button svg {
+    width: 28px;
+    height: 28px;
+  }
+} 
