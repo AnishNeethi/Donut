@@ -41,8 +41,15 @@ def analyze_image(image_path):
         image = Image.open(image_path)
 
         response = client.models.generate_content(
-                model="gemini-2.5-flash", contents=[prompt, image]
+                model="gemini-2.5-pro", contents=[prompt, image]
         )
+
+        if response.usage_metadata:
+            print(f"Prompt Tokens: {response.usage_metadata.prompt_token_count}")
+            print(f"Output Tokens: {response.usage_metadata.candidates_token_count}")
+            print(f"Total Tokens: {response.usage_metadata.total_token_count}")
+        else:
+            print("Usage metadata not available in this response.")
 
         response_text = clean_response(response.text)
 
