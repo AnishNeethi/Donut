@@ -9,7 +9,7 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
-  const [analysisResult, setAnalysisResult] = useState('');
+  const [analysisResult, setAnalysisResult] = useState(null); // Will hold the result temporarily
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
@@ -17,8 +17,10 @@ const AuthPage = () => {
   const [ingredientData, setIngredientData] = useState(null);
   const [ingredientLoading, setIngredientLoading] = useState(false);
   const [ingredientError, setIngredientError] = useState(null);
+  const [timePeriod, setTimePeriod] = useState('7d'); // New state for time filter
+  const [stats, setStats] = useState({ consumed: { calories: 0, sugar: 0 }, saved: { calories: 0, sugar: 0 } }); // New state for stats
 
-  const API_BASE = 'https://donut-backend-o6ef.onrender.com';
+  const API_BASE = 'http://127.0.0.1:8000';
 
   useEffect(() => {
     if (token) {
@@ -87,6 +89,7 @@ const AuthPage = () => {
     setIsLoggedIn(false);
     setCurrentView('login');
     setMessage('');
+    setAnalysisResult(null);
   };
 
   const handleFileSelect = (e) => {
@@ -104,8 +107,8 @@ const AuthPage = () => {
     setMessage('Compressing image...');
 
     const options = {
-      maxSizeMB: 0.07, // Aim for ~70KB
-      maxWidthOrHeight: 512, // Resize to a max of 512px
+      maxSizeMB: 0.07,
+      maxWidthOrHeight: 512,
       useWebWorker: true,
       fileType: 'image/jpeg',
     };
@@ -115,8 +118,7 @@ const AuthPage = () => {
       setMessage('Uploading compressed image...');
 
       const formData = new FormData();
-      // Important: use the compressed file and give it a name
-      formData.append('file', compressedFile, compressedFile.name);
+      formData.append('file', compressedFile, selectedFile.name); // Use original name
 
       const response = await fetch(`${API_BASE}/upload`, {
         method: 'POST',
@@ -129,10 +131,11 @@ const AuthPage = () => {
       const data = await response.json();
       
       if (response.ok) {
-        setAnalysisResult(JSON.stringify(data, null, 2));
-        setMessage('Image analyzed successfully!');
+        setAnalysisResult(data); // Store result object, not string
+        setMessage('Analysis complete. How would you like to log this?');
       } else {
         setMessage(data.error || 'Upload failed');
+        setAnalysisResult(null);
       }
     } catch (error) {
       console.error('Compression or Upload Error:', error);
@@ -142,10 +145,52 @@ const AuthPage = () => {
     }
   };
 
-  const handleGetHistory = async () => {
+  const handleSaveToHistory = async (consumed) => {
+    if (!analysisResult || !selectedFile) return;
+    
+    setLoading(true);
+    setMessage('Saving to history...');
+
+    try {
+        const response = await fetch(`${API_BASE}/save-analysis`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                filename: selectedFile.name,
+                analysis: analysisResult,
+                consumed: consumed,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            setMessage('Successfully saved to history!');
+        } else {
+            setMessage(data.detail || 'Failed to save to history.');
+        }
+    } catch (error) {
+        setMessage('An error occurred while saving.');
+    } finally {
+        setLoading(false);
+        setAnalysisResult(null); // Reset after saving
+        setSelectedFile(null);
+    }
+  };
+
+  const handleDontSave = () => {
+    setAnalysisResult(null);
+    setSelectedFile(null);
+    setMessage('Analysis discarded.');
+  }
+
+  const handleGetHistory = async (period = '7d') => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/history`, {
+      const response = await fetch(`${API_BASE}/history?period=${period}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -156,6 +201,7 @@ const AuthPage = () => {
       
       if (response.ok) {
         setHistory(data);
+        calculateStats(data); // Calculate stats after fetching
         setMessage('History loaded successfully!');
       } else {
         setMessage(data.error || 'Failed to load history');
@@ -165,6 +211,34 @@ const AuthPage = () => {
     }
     setLoading(false);
   };
+
+  const calculateStats = (historyData) => {
+    const newStats = {
+        consumed: { calories: 0, sugar: 0 },
+        saved: { calories: 0, sugar: 0 }
+    };
+
+    historyData.forEach(item => {
+        const calories = parseInt(item.analysis?.nutrition_data?.calories) || 0;
+        const sugar = parseInt(item.analysis?.nutrition_data?.sugar) || 0;
+
+        if (item.consumed) {
+            newStats.consumed.calories += calories;
+            newStats.consumed.sugar += sugar;
+        } else if (item.consumed === false) {
+            newStats.saved.calories += calories;
+            newStats.saved.sugar += sugar;
+        }
+    });
+
+    setStats(newStats);
+  };
+  
+  useEffect(() => {
+    if (isLoggedIn && currentView === 'history') {
+        handleGetHistory(timePeriod);
+    }
+  }, [isLoggedIn, currentView, timePeriod]);
 
   const handleIngredientClick = (ingredient) => {
     setSelectedIngredient(ingredient);
@@ -348,7 +422,7 @@ const AuthPage = () => {
         <button 
           onClick={() => {
             setCurrentView('history');
-            handleGetHistory();
+            handleGetHistory(timePeriod);
           }}
           style={{ padding: '5px 10px' }}
         >
@@ -359,28 +433,34 @@ const AuthPage = () => {
       {currentView === 'upload' && (
         <div>
           <h3>Upload and Analyze Image</h3>
-          <form onSubmit={handleUpload}>
-            <div style={{ marginBottom: '10px' }}>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                style={{ marginBottom: '10px' }}
-              />
-            </div>
-            
-            <button 
-              type="submit" 
-              disabled={loading || !selectedFile}
-              style={{ padding: '10px' }}
-            >
-              {loading ? 'Analyzing...' : 'Upload and Analyze'}
-            </button>
-          </form>
-
-          {analysisResult && (
+          
+          {!analysisResult ? (
+            <form onSubmit={handleUpload}>
+              <div style={{ marginBottom: '10px' }}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  style={{ marginBottom: '10px' }}
+                />
+              </div>
+              
+              <button 
+                type="submit" 
+                disabled={loading || !selectedFile}
+                style={{ padding: '10px' }}
+              >
+                {loading ? 'Analyzing...' : 'Upload and Analyze'}
+              </button>
+            </form>
+          ) : (
             <div style={{ marginTop: '20px' }}>
               {renderAnalysisResult(analysisResult)}
+              <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+                <button onClick={() => handleSaveToHistory(true)} disabled={loading} style={{ padding: '10px', backgroundColor: '#28a745' }}>Eaten</button>
+                <button onClick={() => handleSaveToHistory(false)} disabled={loading} style={{ padding: '10px', backgroundColor: '#ffc107' }}>Not Eaten</button>
+                <button onClick={handleDontSave} disabled={loading} style={{ padding: '10px', backgroundColor: '#6c757d' }}>Don't Add to History</button>
+              </div>
             </div>
           )}
         </div>
@@ -389,6 +469,27 @@ const AuthPage = () => {
       {currentView === 'history' && (
         <div>
           <h3>Analysis History</h3>
+          
+          <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
+            <button onClick={() => setTimePeriod('7d')} disabled={loading} style={{ padding: '8px 12px', backgroundColor: timePeriod === '7d' ? '#007bff' : '#6c757d' }}>Last 7 Days</button>
+            <button onClick={() => setTimePeriod('1m')} disabled={loading} style={{ padding: '8px 12px', backgroundColor: timePeriod === '1m' ? '#007bff' : '#6c757d' }}>Last Month</button>
+            <button onClick={() => setTimePeriod('1y')} disabled={loading} style={{ padding: '8px 12px', backgroundColor: timePeriod === '1y' ? '#007bff' : '#6c757d' }}>Last Year</button>
+            <button onClick={() => setTimePeriod('all')} disabled={loading} style={{ padding: '8px 12px', backgroundColor: timePeriod === 'all' ? '#007bff' : '#6c757d' }}>All Time</button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+            <div style={{ padding: '20px', backgroundColor: '#2a2a2a', borderRadius: '8px' }}>
+                <h4 style={{ color: '#28a745', marginTop: 0 }}>Consumed</h4>
+                <p>Calories: {stats.consumed.calories} kcal</p>
+                <p>Sugar: {stats.consumed.sugar} g</p>
+            </div>
+            <div style={{ padding: '20px', backgroundColor: '#2a2a2a', borderRadius: '8px' }}>
+                <h4 style={{ color: '#ffc107', marginTop: 0 }}>Saved</h4>
+                <p>Calories: {stats.saved.calories} kcal</p>
+                <p>Sugar: {stats.saved.sugar} g</p>
+            </div>
+          </div>
+
           {loading ? (
             <p>Loading history...</p>
           ) : (
@@ -398,7 +499,20 @@ const AuthPage = () => {
               ) : (
                 history.map((item, index) => (
                   <div key={index} style={{ border: '1px solid #ccc', margin: '10px 0', padding: '10px' }}>
-                    <h4>File: {item.filename}</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <h4 style={{marginBottom: '5px'}}>File: {item.filename}</h4>
+                        <small>{new Date(item.timestamp).toLocaleString()}</small>
+                      </div>
+                      <span style={{
+                        padding: '5px 10px',
+                        borderRadius: '15px',
+                        color: 'white',
+                        backgroundColor: item.consumed ? '#28a745' : (item.consumed === false ? '#ffc107' : '#6c757d')
+                      }}>
+                        {item.consumed ? 'Eaten' : (item.consumed === false ? 'Not Eaten' : 'N/A')}
+                      </span>
+                    </div>
                     {renderAnalysisResult(JSON.stringify(item.analysis, null, 2))}
                   </div>
                 ))
@@ -434,12 +548,13 @@ const AuthPage = () => {
             padding: '30px',
             borderRadius: '10px',
             maxWidth: '500px',
+            width: '90%',
             maxHeight: '80vh',
             overflow: 'auto',
             border: '2px solid #333',
             position: 'relative',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.5)',
           }}>
-            {/* Close button */}
             <button
               onClick={closeIngredientPopup}
               style={{
@@ -461,77 +576,47 @@ const AuthPage = () => {
               {selectedIngredient}
             </h2>
 
-            {ingredientLoading && (
-              <div style={{ textAlign: 'center', padding: '20px' }}>
-                <p>Analyzing ingredient...</p>
-              </div>
-            )}
+            {ingredientLoading && <p>Analyzing ingredient...</p>}
 
-            {ingredientError && (
-              <div style={{ 
-                backgroundColor: '#ff4444', 
-                color: '#ffffff', 
-                padding: '10px', 
-                borderRadius: '5px',
-                marginBottom: '15px'
-              }}>
-                {ingredientError}
-              </div>
-            )}
+            {ingredientError && <p style={{ color: '#ff4444' }}>Error: {ingredientError}</p>}
 
             {ingredientData && (
               <div>
-                {/* Pronunciation */}
-                <div style={{ marginBottom: '20px' }}>
+                <div style={{ marginBottom: '15px' }}>
                   <h3 style={{ color: '#4ecdc4', marginBottom: '5px' }}>Pronunciation</h3>
-                  <p style={{ fontSize: '18px', fontStyle: 'italic' }}>
+                  <p style={{ margin: 0, fontSize: '18px', fontStyle: 'italic' }}>
                     {ingredientData.pronunciation}
                   </p>
                 </div>
-
-                {/* Common Products */}
-                <div style={{ marginBottom: '20px' }}>
-                  <h3 style={{ color: '#4ecdc4', marginBottom: '10px' }}>Common Products</h3>
-                  <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                    {ingredientData.common_products.map((product, index) => (
-                      <li key={index} style={{ marginBottom: '5px' }}>{product}</li>
-                    ))}
-                  </ul>
+                
+                <div style={{ marginBottom: '15px' }}>
+                  <h3 style={{ color: '#4ecdc4', marginBottom: '5px' }}>Purpose</h3>
+                  <p style={{ margin: 0 }}>{ingredientData.purpose}</p>
                 </div>
 
-                {/* Health Consensus */}
+                <div style={{ marginBottom: '15px' }}>
+                  <h3 style={{ color: '#4ecdc4', marginBottom: '5px' }}>Commonly Found In</h3>
+                  <p style={{ margin: 0 }}>{ingredientData.commonly_found_in}</p>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <h3 style={{ color: '#4ecdc4', marginBottom: '5px' }}>Origin</h3>
+                  <p style={{ margin: 0 }}>{ingredientData.natural_or_synthetic}</p>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <h3 style={{ color: '#4ecdc4', marginBottom: '5px' }}>Safety Status</h3>
+                  <p style={{ margin: 0 }}>{ingredientData.safety_status}</p>
+                </div>
+                
+                <div style={{ marginBottom: '15px' }}>
+                  <h3 style={{ color: '#4ecdc4', marginBottom: '5px' }}>Health Concerns</h3>
+                  <p style={{ margin: 0 }}>{ingredientData.health_concerns}</p>
+                </div>
+
                 <div>
-                  <h3 style={{ color: '#4ecdc4', marginBottom: '10px' }}>Health Consensus</h3>
-                  <div style={{ backgroundColor: '#2a2a2a', padding: '15px', borderRadius: '5px' }}>
-                    <div style={{ marginBottom: '10px' }}>
-                      <strong>Safety:</strong> 
-                      <span style={{ 
-                        color: ingredientData.health_consensus.safety === 'safe' ? '#4caf50' : 
-                               ingredientData.health_consensus.safety === 'unsafe' ? '#f44336' : '#ff9800',
-                        marginLeft: '10px'
-                      }}>
-                        {ingredientData.health_consensus.safety}
-                      </span>
-                    </div>
-                    <div style={{ marginBottom: '10px' }}>
-                      <strong>Healthiness:</strong> 
-                      <span style={{ 
-                        color: ingredientData.health_consensus.healthiness === 'healthy' ? '#4caf50' : 
-                               ingredientData.health_consensus.healthiness === 'unhealthy' ? '#f44336' : '#ff9800',
-                        marginLeft: '10px'
-                      }}>
-                        {ingredientData.health_consensus.healthiness}
-                      </span>
-                    </div>
-                    {ingredientData.health_consensus.notes && (
-                      <div style={{ marginBottom: '10px' }}>
-                        <strong>Notes:</strong> {ingredientData.health_consensus.notes}
-                      </div>
-                    )}
-                    <div>
-                      <strong>Recommendation:</strong> {ingredientData.health_consensus.recommendation}
-                    </div>
-                  </div>
+                  <h3 style={{ color: '#4ecdc4', marginBottom: '5px' }}>Recommended Intake</h3>
+                  <p style={{ margin: 0 }}>{ingredientData.recommended_intake}</p>
                 </div>
               </div>
             )}

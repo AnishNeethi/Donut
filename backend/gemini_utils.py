@@ -18,7 +18,15 @@ def analyze_image(image_bytes: bytes):
     Returns:
         JSON response from Gemini analysis.
     """
-    prompt = """
+    print("\n--- [START IMAGE ANALYSIS] ---")
+    try:
+        print(f"[ANALYSIS] Received {len(image_bytes) / 1024:.2f} KB of image data.")
+        
+        print("[ANALYSIS] Step 1: Loading bytes into a PIL Image object...")
+        image = Image.open(io.BytesIO(image_bytes))
+        print(f"[ANALYSIS] Step 1 SUCCESS: Image loaded. Format: {image.format}, Size: {image.size}")
+        
+        prompt = """
     Analyze this food image and return a JSON response with the following structure:
     {
         "food_name": "Name of the food item",
@@ -46,23 +54,27 @@ def analyze_image(image_bytes: bytes):
     Return only the JSON response, no additional text.
     """
 
-    try:
-        image = Image.open(io.BytesIO(image_bytes))
-        
+        print("[ANALYSIS] Step 2: Sending request to Google Gemini API...")
         response = client.models.generate_content(
                 model="gemini-2.5-flash-lite-preview-06-17", contents=[prompt, image]
         )
+        print("[ANALYSIS] Step 2 SUCCESS: Received response from Gemini.")
 
         response_text = clean_response(response.text)
+        print("[ANALYSIS] Step 3: Response content cleaned successfully.")
 
         try:
-            return json.loads(response_text)
+            result = json.loads(response_text)
+            print("[ANALYSIS] Step 4 SUCCESS: JSON parsed. Analysis complete.")
+            print("--- [END IMAGE ANALYSIS] ---\n")
+            return result
         except json.JSONDecodeError:
-            print("[WARNING] Gemini returned malformed JSON.")
+            print("[ANALYSIS ERROR] Gemini returned malformed JSON.")
             return {"raw_response": response_text}
 
     except Exception as e:
-        print(f"[ERROR] Failed to analyze image: {e}")
+        print(f"[ANALYSIS CRITICAL ERROR] An exception occurred: {e}")
+        print("--- [END IMAGE ANALYSIS WITH ERROR] ---\n")
         return {"error": str(e)}
 
 
