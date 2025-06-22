@@ -4,6 +4,10 @@ from dotenv import load_dotenv
 from google import genai
 from PIL import Image
 import io
+from fooddata_utils import search_fooddata_product
+import logging
+
+logger = logging.getLogger("gemini_utils")
 
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
@@ -18,18 +22,21 @@ def analyze_image(image_bytes: bytes):
     Returns:
         JSON response from Gemini analysis.
     """
-    print("\n--- [START IMAGE ANALYSIS] ---")
+    logger.info("\n--- [START IMAGE ANALYSIS] ---")
     try:
-        print(f"[ANALYSIS] Received {len(image_bytes) / 1024:.2f} KB of image data.")
+        logger.info(f"[ANALYSIS] Received {len(image_bytes) / 1024:.2f} KB of image data.")
         
-        print("[ANALYSIS] Step 1: Loading bytes into a PIL Image object...")
+        logger.info("[ANALYSIS] Step 1: Loading bytes into a PIL Image object...")
         image = Image.open(io.BytesIO(image_bytes))
-        print(f"[ANALYSIS] Step 1 SUCCESS: Image loaded. Format: {image.format}, Size: {image.size}")
+        logger.info(f"[ANALYSIS] Step 1 SUCCESS: Image loaded. Format: {image.format}, Size: {image.size}")
         
         prompt = """
     Analyze this food image and return a JSON response with the following structure:
     {
         "food_name": "Name of the food item",
+        "estimated_size": "estimated product size (100g, 100mL, etc.)",
+        "upc_code": "12-digit UPC code (make your best guess, must be exactly 12 digits)",
+        "upc_confidence": 0.85,
         "nutrition_data": {
             "calories": "estimated calories per serving",
             "protein": "protein content in grams",
@@ -48,33 +55,58 @@ def analyze_image(image_bytes: bytes):
         ]
     }
 
-    Please provide realistic estimates based on what you can see in the image.
-    Make sure that the ingridents and values are based off of Ontario, Canada.
-    If you cannot determine certain values, use "unknown" for that field.
+    IMPORTANT RULES:
+    1. ALWAYS generate a UPC code - make your best guess based on the food type and brand if visible
+    2. UPC code must be exactly 12 digits (use 000000000000 if completely unsure)
+    3. UPC confidence must be a decimal between 0.0 and 1.0
+    4. If you can see a clear brand name or product, confidence should be 0.7 or higher
+    5. If the image is unclear or generic, confidence should be below 0.7
+    6. Make sure that the ingredients and values are based off of Ontario, Canada.
+    7. If you cannot determine certain values, use "unknown" for that field.
+
     Return only the JSON response, no additional text.
     """
 
-        print("[ANALYSIS] Step 2: Sending request to Google Gemini API...")
+        logger.info("[ANALYSIS] Step 2: Sending request to Google Gemini API...")
         response = client.models.generate_content(
                 model="gemini-2.5-flash-lite-preview-06-17", contents=[prompt, image]
         )
-        print("[ANALYSIS] Step 2 SUCCESS: Received response from Gemini.")
+        logger.info("[ANALYSIS] Step 2 SUCCESS: Received response from Gemini.")
 
         response_text = clean_response(response.text)
-        print("[ANALYSIS] Step 3: Response content cleaned successfully.")
+        logger.info("[ANALYSIS] Step 3: Response content cleaned successfully.")
 
         try:
             result = json.loads(response_text)
-            print("[ANALYSIS] Step 4 SUCCESS: JSON parsed. Analysis complete.")
-            print("--- [END IMAGE ANALYSIS] ---\n")
+            logger.info("[ANALYSIS] Step 4 SUCCESS: JSON parsed. Analysis complete.")
+            
+            # Debug: Print the result structure
+            logger.info(f"[ANALYSIS DEBUG] Result keys: {list(result.keys())}")
+            logger.info(f"[ANALYSIS DEBUG] Food name: {result.get('food_name')}")
+            logger.info(f"[ANALYSIS DEBUG] Estimated size: {result.get('estimated_size')}")
+            logger.info(f"[ANALYSIS DEBUG] UPC code: {result.get('upc_code')}")
+            logger.info(f"[ANALYSIS DEBUG] UPC confidence: {result.get('upc_confidence')}")
+            
+            # Check UPC confidence and conditionally search FoodData Central
+            upc_confidence = result.get("upc_confidence", 0.0)
+            if upc_confidence >= 0.7:
+                logger.info(f"[ANALYSIS] Step 5: UPC confidence {upc_confidence} >= 0.7, searching FoodData Central...")
+                if result.get("upc_code"):
+                    search_fooddata_product(result["upc_code"])
+                else:
+                    logger.info("[ANALYSIS] Step 5 SKIPPED: Missing UPC code in result")
+            else:
+                logger.info(f"[ANALYSIS] Step 5 SKIPPED: UPC confidence {upc_confidence} < 0.7, skipping FoodData Central search")
+            
+            logger.info("--- [END IMAGE ANALYSIS] ---\n")
             return result
         except json.JSONDecodeError:
-            print("[ANALYSIS ERROR] Gemini returned malformed JSON.")
+            logger.warning("[ANALYSIS ERROR] Gemini returned malformed JSON.")
             return {"raw_response": response_text}
 
     except Exception as e:
-        print(f"[ANALYSIS CRITICAL ERROR] An exception occurred: {e}")
-        print("--- [END IMAGE ANALYSIS WITH ERROR] ---\n")
+        logger.error(f"[ANALYSIS CRITICAL ERROR] An exception occurred: {e}")
+        logger.info("--- [END IMAGE ANALYSIS WITH ERROR] ---\n")
         return {"error": str(e)}
 
 
@@ -115,18 +147,18 @@ def analyze_ingredient(ingredient_name):
         try:
             return json.loads(response_text)
         except json.JSONDecodeError:
-            print("[WARNING] Gemini returned malformed JSON.")
+            logger.warning("[WARNING] Gemini returned malformed JSON.")
             return {"raw_response": response_text}
 
     except Exception as e:
-        print(f"[ERROR] Failed to analyze ingredient: {e}")
+        logger.error(f"[ERROR] Failed to analyze ingredient: {e}")
         return {"error": str(e)}
 
 
 def clean_response(response_text):
     # Remove markdown code fences if present
     if response_text.startswith("```json"):
-        response_text = response_text[len("```json"):]
+        response_text = response_text[len("```json") :]
 
     if response_text.endswith("```"):
         response_text = response_text[:-3]
