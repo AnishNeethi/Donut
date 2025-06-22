@@ -48,20 +48,20 @@ const ProfilePage = () => {
       <div className="profile-content">
         {isAuthenticated ? (
           <div className="authenticated-content">
-            <h2>Profile</h2>
+            <h2>profile</h2>
             <div className="user-info">
-              <p className="username">Welcome, {username}!</p>
+              <p className="username">welcome, {username}!</p>
               <button className="logout-button" onClick={handleLogout}>
-                Logout
+                logout
               </button>
             </div>
           </div>
         ) : (
           <div className="login-prompt">
-            <h2>Profile</h2>
-            <p>You need to log in to view your profile.</p>
+            <h2>profile</h2>
+            <p>you need to log in to view your profile.</p>
             <button className="login-button" onClick={handleLoginClick}>
-              Login
+              login
             </button>
           </div>
         )}

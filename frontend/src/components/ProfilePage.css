@@ -1,7 +1,7 @@
 .profile-page {
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 50%, #FFE4E1 100%);
+  background: #FFB6C1;
   display: flex;
   position: fixed;
   top: 0;

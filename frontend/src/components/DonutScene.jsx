@@ -8,8 +8,8 @@ const DonutScene = ({ sugarCount = 0 }) => {
   const [donuts, setDonuts] = useState([])
 
   useEffect(() => {
-    // Create donuts based on sugar count (e.g., 1 donut per 5g of sugar)
-    const donutsToSpawn = Math.ceil(sugarCount / 5)
+    // Create donuts based on sugar count (e.g., 1 donut per 10g of sugar)
+    const donutsToSpawn = Math.ceil(sugarCount / 10)
     const newDonuts = []
     
     for (let i = 0; i < donutsToSpawn; i++) {
@@ -60,7 +60,7 @@ const DonutScene = ({ sugarCount = 0 }) => {
       
       {sugarCount > 0 && (
         <div className="sugar-info">
-          <p>sugar: {sugarCount}g = {Math.ceil(sugarCount / 5)} donuts!</p>
+          <p>sugar: {sugarCount}g = {Math.ceil(sugarCount / 10)} donuts!</p>
         </div>
       )}
     </div>
@@ -73,7 +73,7 @@ const Ground = () => {
     <RigidBody type="fixed">
       <mesh receiveShadow position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[20, 20]} />
-        <meshStandardMaterial color="#f0f0f0" />
+        <meshStandardMaterial color="#FFB6C1" />
       </mesh>
     </RigidBody>
   )
