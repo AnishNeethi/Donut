@@ -117,4 +117,4 @@ Submit pull requests for major changes. Open an issue first to discuss proposed 
 MIT License
 
 ## Project Status
-Developed for SpurHacks 2024. Active development.
+Developed for SpurHacks 2025. Active development.
