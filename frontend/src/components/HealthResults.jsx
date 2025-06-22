@@ -64,7 +64,9 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
     setIngredientLoading(false);
   };
 
-
+  const handleCameraClick = () => {
+    document.getElementById('fileInput').click();
+  };
 
   const categories = [
     {
@@ -147,6 +149,21 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
 
   return (
     <div className="health-results">
+      {/* Hidden camera input */}
+      <input
+        type="file"
+        id="fileInput"
+        accept="image/*"
+        capture="environment"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            onBackToHome(); // This will trigger the parent component's file handling
+          }
+        }}
+        style={{ display: 'none' }}
+      />
+
       <div className="food-title">
         <h2>{foodName}</h2>
       </div>
@@ -212,6 +229,12 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
             </button>
           </div>
         )}
+      </div>
+
+      <div className="results-actions">
+        <button className="action-btn" onClick={handleCameraClick}>
+          analyze another food
+        </button>
       </div>
 
       {/* Ingredient Popup */}

@@ -141,6 +141,59 @@ const Landing = () => {
     }
   };
 
+  const handleAnalyzeAnother = async (file) => {
+    if (file && !loading) {
+      console.log('Selected file:', file);
+      setSelectedFile(file);
+      setButtonSlideOut(true);
+      setTitleVisible(false);
+      
+      // Wait for button animation to complete before starting upload
+      setTimeout(() => {
+        handleUploadStart();
+      }, 500);
+      
+      setLoading(true);
+      setMessage('compressing image...');
+
+      const options = {
+        maxSizeMB: 0.07,
+        maxWidthOrHeight: 512,
+        useWebWorker: true,
+        fileType: 'image/jpeg',
+      };
+
+      try {
+        const compressedFile = await imageCompression(file, options);
+        setMessage('analyzing your food...');
+
+        const formData = new FormData();
+        formData.append('file', compressedFile, file.name);
+
+        const response = await fetch(`${API_BASE}/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          setAnalysisData(data);
+          handleUploadComplete(data);
+        } else {
+          setMessage(data.error || 'upload failed');
+          handleUploadError(data.error || 'upload failed');
+        }
+      } catch (error) {
+        console.error('Compression or Upload Error:', error);
+        setMessage('an error occurred during compression or upload.');
+        handleUploadError('an error occurred during compression or upload.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const getSugarAmount = () => {
     if (!analysisData?.nutrition_data?.sugar) return 0;
     return parseInt(analysisData.nutrition_data.sugar) || 0;
@@ -180,9 +233,6 @@ const Landing = () => {
             <div className="results-actions">
               <button className="action-btn" onClick={handleViewDonutScene}>
                 view sugar visualization
-              </button>
-              <button className="action-btn secondary" onClick={handleBackToHome}>
-                analyze another food
               </button>
             </div>
           </div>
@@ -230,11 +280,6 @@ const Landing = () => {
                   onSaveData={handleSaveData}
                   onBackToHome={handleBackToHome}
                 />
-                <div className="results-actions">
-                  <button className="action-btn secondary" onClick={handleBackToHome}>
-                    analyze another food
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -259,7 +304,7 @@ const Landing = () => {
               type="file"
               id="fileInput"
               accept="image/*"
-              onChange={handleFileSelect}
+              onChange={(e) => handleAnalyzeAnother(e.target.files[0])}
               style={{ display: 'none' }}
             />
           </>
@@ -275,7 +320,7 @@ const Landing = () => {
         id="fileInput" 
         accept="image/*" 
         style={{ display: 'none' }} 
-        onChange={handleFileSelect}
+        onChange={(e) => handleAnalyzeAnother(e.target.files[0])}
       />
 
       {/* Hamburger Menu Button */}
