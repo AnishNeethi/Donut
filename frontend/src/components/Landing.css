@@ -170,6 +170,124 @@ body, html {
   font-family: Arial, sans-serif;
 }
 
+/* Title Exit Animation */
+.title-exit {
+  animation: titleFallOut 0.5s ease-in forwards;
+}
+
+@keyframes titleFallOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh);
+  }
+}
+
+/* Results Container */
+.results-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.results-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.action-btn {
+  padding: 15px 25px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 3px solid #FFB6C1;
+  border-radius: 25px;
+  color: #FFB6C1;
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: normal;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  background-color: #fff;
+  border-color: #000;
+  color: #000;
+}
+
+.action-btn.secondary {
+  background-color: transparent;
+  color: #000;
+  border-color: #000;
+}
+
+.action-btn.secondary:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Donut Scene Container */
+.donut-scene-container {
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.scene-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.back-btn {
+  padding: 10px 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 2px solid #FFB6C1;
+  border-radius: 20px;
+  color: #FFB6C1;
+  font-family: Arial, sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #fff;
+  border-color: #000;
+  color: #000;
+}
+
+.sugar-info {
+  text-align: center;
+}
+
+.sugar-info h3 {
+  font-size: 1.5rem;
+  color: #000;
+  font-family: Arial, sans-serif;
+  font-weight: normal;
+  margin: 0 0 5px 0;
+}
+
+.sugar-info p {
+  font-size: 1rem;
+  color: #000;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  opacity: 0.8;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .app-title {
