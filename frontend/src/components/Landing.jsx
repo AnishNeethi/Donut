@@ -4,6 +4,7 @@ import LoadingScreen from './LoadingScreen';
 import HealthResults from './HealthResults';
 import DonutScene from './DonutScene';
 import AuthModal from './AuthModal';
+import imageCompression from 'browser-image-compression';
 import './Landing.css';
 import { Link } from 'react-router-dom';
 
@@ -14,6 +15,11 @@ const Landing = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [titleVisible, setTitleVisible] = useState(true);
   const [overlayVisible, setOverlayVisible] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
   const toggleMenu = () => {
     if (!isMenuOpen) {
@@ -31,25 +37,53 @@ const Landing = () => {
     document.getElementById('fileInput').click();
   };
 
-  const handleFileSelect = (event) => {
+  const handleFileSelect = async (event) => {
     const file = event.target.files[0];
     if (file) {
       console.log('Selected file:', file);
+      setSelectedFile(file);
       handleUploadStart();
-      // Here you can process the file directly
-      // For now, we'll simulate the upload process
-      setTimeout(() => {
-        // Mock data for demonstration
-        const mockData = {
-          nutrition_data: {
-            sugar: '25',
-            calories: '450',
-            fat: '12',
-            protein: '8'
-          }
-        };
-        handleUploadComplete(mockData);
-      }, 2000);
+      
+      // Use the same upload logic as AuthPage
+      setLoading(true);
+      setMessage('Compressing image...');
+
+      const options = {
+        maxSizeMB: 0.07,
+        maxWidthOrHeight: 512,
+        useWebWorker: true,
+        fileType: 'image/jpeg',
+      };
+
+      try {
+        const compressedFile = await imageCompression(file, options);
+        setMessage('Uploading compressed image...');
+
+        const formData = new FormData();
+        formData.append('file', compressedFile, file.name);
+
+        const response = await fetch(`${API_BASE}/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          setAnalysisData(data);
+          setMessage('Analysis complete!');
+          handleUploadComplete(data);
+        } else {
+          setMessage(data.error || 'Upload failed');
+          handleUploadError(data.error || 'Upload failed');
+        }
+      } catch (error) {
+        console.error('Compression or Upload Error:', error);
+        setMessage('An error occurred during compression or upload.');
+        handleUploadError('An error occurred during compression or upload.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -82,6 +116,8 @@ const Landing = () => {
     setCurrentView('landing');
     setTitleVisible(true);
     setAnalysisData(null);
+    setSelectedFile(null);
+    setMessage('');
   };
 
   const getSugarAmount = () => {
@@ -101,7 +137,7 @@ const Landing = () => {
         );
       
       case 'loading':
-        return <LoadingScreen message="Analyzing your food..." />;
+        return <LoadingScreen message={message || "Analyzing your food..."} />;
       
       case 'results':
         return (
@@ -188,6 +224,7 @@ const Landing = () => {
             <ul>
               <li><Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link></li>
               <li><Link to="/history" onClick={() => setIsMenuOpen(false)}>History</Link></li>
+              <li><Link to="/auth" onClick={() => setIsMenuOpen(false)}>Dashboard</Link></li>
               <li><a href="#user">User</a></li>
               <li><a href="#settings">Settings</a></li>
               <li><a href="#feature1">Feature 1</a></li>

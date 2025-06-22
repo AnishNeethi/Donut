@@ -23,15 +23,9 @@ class SaveAnalysisRequest(BaseModel):
 
 @router.post("/upload")
 async def upload_image(
-    file: UploadFile = File(...),
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    file: UploadFile = File(...)
 ):
     try:
-        token = credentials.credentials
-        current_user = decode_access_token(token)
-        if not current_user:
-            raise HTTPException(status_code=401, detail="Invalid token")
-
         # Read image bytes from the uploaded file (now compressed by the frontend)
         file_content = await file.read()
         
