@@ -35,7 +35,7 @@ const Landing = () => {
 
   const handleFileSelect = async (event) => {
     const file = event.target.files[0];
-    if (file) {
+    if (file && !loading) { // Prevent multiple uploads
       console.log('Selected file:', file);
       setSelectedFile(file);
       setButtonSlideOut(true);
@@ -59,7 +59,7 @@ const Landing = () => {
 
       try {
         const compressedFile = await imageCompression(file, options);
-        setMessage('uploading compressed image...');
+        setMessage('analyzing your food...');
 
         const formData = new FormData();
         formData.append('file', compressedFile, file.name);
@@ -103,6 +103,15 @@ const Landing = () => {
   const handleUploadError = (error) => {
     console.error('Upload error:', error);
     setCurrentView('landing'); // Go back to landing on error
+    setLoading(false);
+    setButtonSlideOut(false);
+    setTitleVisible(true);
+    setTitleFadeOut(false);
+    // Clear the file input
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) {
+      fileInput.value = '';
+    }
   };
 
   const handleSaveData = () => {
@@ -124,6 +133,12 @@ const Landing = () => {
     setMessage('');
     setButtonSlideOut(false);
     setTitleFadeOut(false);
+    setLoading(false);
+    // Clear the file input to allow selecting the same file again
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) {
+      fileInput.value = '';
+    }
   };
 
   const getSugarAmount = () => {
@@ -148,7 +163,7 @@ const Landing = () => {
             {/* Main Content - transition title to loading message */}
             <div className="main-content">
               <h1 className={`app-title title-to-loading ${titleFadeOut ? 'fade-out' : ''}`}>
-                {message || "uploading compressed image..."}
+                {message || "analyzing your food..."}
               </h1>
             </div>
           </>
@@ -179,7 +194,7 @@ const Landing = () => {
              <div className="donut-overlay-info">
                <div className="sugar-info-floating">
                  <h3>sugar: {getSugarAmount()}g</h3>
-                 <p>{Math.ceil(getSugarAmount() / 5)} donuts falling!</p>
+                 <p>{Math.ceil(getSugarAmount() / 10)} donuts falling!</p>
                </div>
              </div>
              

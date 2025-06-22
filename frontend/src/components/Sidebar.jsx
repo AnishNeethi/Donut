@@ -9,12 +9,6 @@ const Sidebar = ({ isOpen, onClose, menuItems = [] }) => {
   const defaultMenuItems = [
     { path: '/', label: 'home' },
     { path: '/history', label: 'history' },
-    { path: '/auth', label: 'dashboard' },
-    { path: '#user', label: 'user', external: true },
-    { path: '#settings', label: 'Settings', external: true },
-    { path: '#feature1', label: 'Feature 1', external: true },
-    { path: '#feature2', label: 'Feature 2', external: true },
-    { path: '#feature3', label: 'Feature 3', external: true },
   ];
 
   const items = menuItems.length > 0 ? menuItems : defaultMenuItems;

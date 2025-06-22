@@ -32,7 +32,7 @@ const DonutDemo = () => {
       
       <div className="info">
         <p>
-          <strong>how it works:</strong> every 5g of sugar = 1 donut falling from the sky!
+          <strong>how it works:</strong> every 10g of sugar = 1 donut falling from the sky!
         </p>
         <p>
           try different values to see the physics simulation in action.

@@ -99,7 +99,7 @@ const HistoryPage = () => {
       <div className="history-visualization">
         <div className="sugar-summary">
           <h2>total sugar {filter === 'eaten' ? 'consumed' : 'avoided'}: {totalSugar}g</h2>
-          <p>that's equivalent to {Math.ceil(totalSugar / 5)} donuts!</p>
+          <p>that's equivalent to {Math.ceil(totalSugar / 10)} donuts!</p>
         </div>
         <DonutScene sugarCount={totalSugar} />
       </div>
