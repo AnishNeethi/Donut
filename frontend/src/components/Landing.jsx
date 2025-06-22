@@ -5,6 +5,7 @@ import HealthResults from './HealthResults';
 import DonutScene from './DonutScene';
 import AuthModal from './AuthModal';
 import './Landing.css';
+import { Link } from 'react-router-dom';
 
 const Landing = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -132,7 +133,7 @@ const Landing = () => {
   return (
     <div className="landing-container">
       {/* Hamburger Menu Button */}
-      <button className="hamburger-menu" onClick={toggleMenu}>
+      <button className={`hamburger-menu ${isMenuOpen ? 'menu-open' : ''}`} onClick={toggleMenu}>
         <div className="hamburger-line"></div>
         <div className="hamburger-line"></div>
         <div className="hamburger-line"></div>
@@ -145,10 +146,10 @@ const Landing = () => {
         <div className="menu-content">
           <nav className="menu-nav">
             <ul>
-              <li><a href="#home" onClick={handleBackToHome}>Home</a></li>
+              <li><Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link></li>
+              <li><Link to="/history" onClick={() => setIsMenuOpen(false)}>History</Link></li>
               <li><a href="#user">User</a></li>
               <li><a href="#settings">Settings</a></li>
-              <li><a href="#history">History</a></li>
               <li><a href="#feature1">Feature 1</a></li>
               <li><a href="#feature2">Feature 2</a></li>
               <li><a href="#feature3">Feature 3</a></li>
