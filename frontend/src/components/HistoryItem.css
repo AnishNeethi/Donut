@@ -51,18 +51,22 @@
 }
 
 .expand-btn {
-  background: none;
-  border: 2px solid rgba(0, 0, 0, 0.8);
-  border-radius: 20px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   padding: 8px 15px;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.8);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.history-item:hover .expand-btn {
-  background-color: rgba(0, 0, 0, 0.8);
-  color: #FFB6C1;
+.history-item:hover .expand-btn,
+.expand-btn:hover {
+  background: transparent;
+  color: rgba(0, 0, 0, 1);
+  transform: scale(1.1);
 }
 
 .item-details {
