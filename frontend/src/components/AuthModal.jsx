@@ -33,11 +33,11 @@ const AuthModal = ({ onClose, analysisData }) => {
           localStorage.setItem('token', data.access_token);
           await saveAnalysisData(data.access_token);
         } else {
-          setMessage('Registration successful! Please login to save your data.');
+          setMessage('registration successful! please login to save your data.');
           setIsLogin(true);
         }
       } else {
-        setMessage(data.detail || `${isLogin ? 'Login' : 'Registration'} failed`);
+        setMessage(data.detail || `${isLogin ? 'login' : 'registration'} failed`);
       }
     } catch (error) {
       setMessage(`Error during ${isLogin ? 'login' : 'registration'}`);
@@ -61,15 +61,15 @@ const AuthModal = ({ onClose, analysisData }) => {
       });
 
       if (response.ok) {
-        setMessage('Analysis saved successfully!');
+        setMessage('analysis saved successfully!');
         setTimeout(() => {
           onClose();
         }, 2000);
       } else {
-        setMessage('Failed to save analysis data');
+        setMessage('failed to save analysis data');
       }
     } catch (error) {
-      setMessage('Error saving analysis data');
+      setMessage('error saving analysis data');
     }
   };
 
@@ -77,7 +77,7 @@ const AuthModal = ({ onClose, analysisData }) => {
     <div className="auth-modal-overlay">
       <div className="auth-modal">
         <div className="auth-modal-header">
-          <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
+          <h2>{isLogin ? 'login' : 'sign up'}</h2>
           <button className="close-btn" onClick={onClose}>
             ×
           </button>
@@ -86,33 +86,33 @@ const AuthModal = ({ onClose, analysisData }) => {
         <div className="auth-modal-content">
           <p className="auth-prompt">
             {isLogin 
-              ? 'Login to save your food analysis to your health profile' 
-              : 'Create an account to track your nutrition over time'
+              ? 'login to save your food analysis to your health profile' 
+              : 'create an account to track your nutrition over time'
             }
           </p>
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label htmlFor="email">Email:</label>
+              <label htmlFor="email">email:</label>
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Enter your email"
+                placeholder="enter your email"
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="password">Password:</label>
+              <label htmlFor="password">password:</label>
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Enter your password"
+                placeholder="enter your password"
               />
             </div>
             
@@ -121,19 +121,19 @@ const AuthModal = ({ onClose, analysisData }) => {
               disabled={loading}
               className="auth-submit-btn"
             >
-              {loading ? 'Processing...' : (isLogin ? 'Login & Save' : 'Sign Up')}
+              {loading ? 'processing...' : (isLogin ? 'login & save' : 'sign up')}
             </button>
           </form>
 
           <div className="auth-switch">
             <p>
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              {isLogin ? "don't have an account? " : "already have an account? "}
               <button 
                 type="button"
                 className="switch-btn"
                 onClick={() => setIsLogin(!isLogin)}
               >
-                {isLogin ? 'Sign Up' : 'Login'}
+                {isLogin ? 'sign up' : 'login'}
               </button>
             </p>
           </div>

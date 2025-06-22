@@ -42,8 +42,8 @@
 
 .upload-btn:hover {
   background-color: #fff;
-  border-color: #000;
-  color: #000;
+  border-color: rgba(0, 0, 0, 0.8);
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .upload-btn svg {
@@ -102,13 +102,13 @@
 
 .analyze-btn:hover {
   background-color: #fff;
-  border-color: #000;
-  color: #000;
+  border-color: rgba(0, 0, 0, 0.8);
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .cancel-btn {
   background-color: transparent;
-  color: #000;
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .cancel-btn:hover {

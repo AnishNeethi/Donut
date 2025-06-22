@@ -60,7 +60,7 @@ const DonutScene = ({ sugarCount = 0 }) => {
       
       {sugarCount > 0 && (
         <div className="sugar-info">
-          <p>Sugar: {sugarCount}g = {Math.ceil(sugarCount / 5)} donuts!</p>
+          <p>sugar: {sugarCount}g = {Math.ceil(sugarCount / 5)} donuts!</p>
         </div>
       )}
     </div>

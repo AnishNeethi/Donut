@@ -2,7 +2,7 @@
   background: #FFB6C1;
   min-height: 100vh;
   padding: 40px 20px;
-  color: #000;
+  color: rgba(0, 0, 0, 0.8);
   font-family: Arial, sans-serif;
 }
 
@@ -27,9 +27,9 @@
 .filter-btn {
   padding: 12px 30px;
   background-color: transparent;
-  border: 2px solid #000;
+  border: 2px solid rgba(0, 0, 0, 0.8);
   border-radius: 25px;
-  color: #000;
+  color: rgba(0, 0, 0, 0.8);
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -37,7 +37,7 @@
 
 .filter-btn.active,
 .filter-btn:hover {
-  background-color: #000;
+  background-color: rgba(0, 0, 0, 0.8);
   color: #FFB6C1;
 }
 

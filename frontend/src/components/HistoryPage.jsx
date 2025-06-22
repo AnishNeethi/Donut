@@ -19,7 +19,7 @@ const HistoryPage = () => {
     if (token) {
       handleGetHistory();
     } else {
-      setMessage('Please login to view your history.');
+      setMessage('please login to view your history.');
     }
   }, [token]);
 
@@ -39,10 +39,10 @@ const HistoryPage = () => {
       if (response.ok) {
         setHistory(data);
       } else {
-        setMessage(data.error || 'Failed to load history');
+        setMessage(data.error || 'failed to load history');
       }
     } catch (error) {
-      setMessage('Error loading history');
+      setMessage('error loading history');
     }
     setLoading(false);
   };
@@ -63,9 +63,9 @@ const HistoryPage = () => {
     return (
       <div className="history-page">
         <div className="login-prompt">
-          <h2>Access Denied</h2>
+          <h2>access denied</h2>
           <p>{message}</p>
-          <p>Please log in to see your analysis history.</p>
+          <p>please log in to see your analysis history.</p>
           {/* You might want to add a login button here */}
         </div>
       </div>
@@ -86,32 +86,32 @@ const HistoryPage = () => {
           className={`filter-btn ${filter === 'avoided' ? 'active' : ''}`}
           onClick={() => setFilter('avoided')}
         >
-          Avoided
+          avoided
         </button>
         <button
           className={`filter-btn ${filter === 'eaten' ? 'active' : ''}`}
           onClick={() => setFilter('eaten')}
         >
-          Eaten
+          eaten
         </button>
       </div>
 
       <div className="history-visualization">
         <div className="sugar-summary">
-          <h2>Total Sugar {filter === 'eaten' ? 'Consumed' : 'Avoided'}: {totalSugar}g</h2>
-          <p>That's equivalent to {Math.ceil(totalSugar / 5)} donuts!</p>
+          <h2>total sugar {filter === 'eaten' ? 'consumed' : 'avoided'}: {totalSugar}g</h2>
+          <p>that's equivalent to {Math.ceil(totalSugar / 5)} donuts!</p>
         </div>
         <DonutScene sugarCount={totalSugar} />
       </div>
 
       <div className="history-list-container">
-        <h2 className="list-title">Your {filter === 'eaten' ? 'Eaten' : 'Avoided'} Items</h2>
-        {loading && <p>Loading history...</p>}
+        <h2 className="list-title">your {filter === 'eaten' ? 'eaten' : 'avoided'} items</h2>
+        {loading && <p>loading history...</p>}
         {message && !loading && <p>{message}</p>}
         
         <div className="history-list">
           {!loading && filteredHistory.length === 0 && (
-            <p className="no-history-message">No {filter} items found in your history.</p>
+            <p className="no-history-message">no {filter} items found in your history.</p>
           )}
 
           {filteredHistory.map((item) => (
