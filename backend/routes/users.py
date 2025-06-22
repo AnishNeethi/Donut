@@ -30,19 +30,19 @@ async def register(email: str, password: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/login")
-async def login(email: str, password: str):
+async def login(user: UserLogin):
     try:
         # Find user
-        user = users_collection.find_one({"email": email})
-        if not user:
+        db_user = users_collection.find_one({"email": user.email})
+        if not db_user:
             raise HTTPException(status_code=401, detail="Invalid credentials")
         
         # Verify password
-        if not verify_password(password, user["password"]):
+        if not verify_password(user.password, db_user["password"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
         
         # Create access token
-        access_token = create_access_token(data={"sub": email})
+        access_token = create_access_token(data={"sub": user.email})
         return {"access_token": access_token, "token_type": "bearer"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

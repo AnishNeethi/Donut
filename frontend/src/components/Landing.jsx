@@ -13,13 +13,44 @@ const Landing = () => {
   const [analysisData, setAnalysisData] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [titleVisible, setTitleVisible] = useState(true);
+  const [overlayVisible, setOverlayVisible] = useState(false);
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+    if (!isMenuOpen) {
+      // Opening menu
+      setIsMenuOpen(true);
+      setTimeout(() => setOverlayVisible(true), 10); // Small delay for smooth transition
+    } else {
+      // Closing menu
+      setOverlayVisible(false);
+      setTimeout(() => setIsMenuOpen(false), 300); // Wait for transition to complete
+    }
   };
 
   const handleCameraClick = () => {
-    setCurrentView('upload');
+    document.getElementById('fileInput').click();
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      console.log('Selected file:', file);
+      handleUploadStart();
+      // Here you can process the file directly
+      // For now, we'll simulate the upload process
+      setTimeout(() => {
+        // Mock data for demonstration
+        const mockData = {
+          nutrition_data: {
+            sugar: '25',
+            calories: '450',
+            fat: '12',
+            protein: '8'
+          }
+        };
+        handleUploadComplete(mockData);
+      }, 2000);
+    }
   };
 
   const handleUploadStart = () => {
@@ -33,7 +64,7 @@ const Landing = () => {
 
   const handleUploadError = (error) => {
     console.error('Upload error:', error);
-    setCurrentView('upload');
+    setCurrentView('landing'); // Go back to landing on error
   };
 
   const handleSaveData = () => {
@@ -132,6 +163,15 @@ const Landing = () => {
 
   return (
     <div className="landing-container">
+      {/* Hidden file input */}
+      <input 
+        type="file" 
+        id="fileInput" 
+        accept="image/*" 
+        style={{ display: 'none' }} 
+        onChange={handleFileSelect}
+      />
+
       {/* Hamburger Menu Button */}
       <button className={`hamburger-menu ${isMenuOpen ? 'menu-open' : ''}`} onClick={toggleMenu}>
         <div className="hamburger-line"></div>
@@ -159,7 +199,12 @@ const Landing = () => {
       </div>
 
       {/* Overlay */}
-      {isMenuOpen && <div className="menu-overlay" onClick={toggleMenu}></div>}
+      {isMenuOpen && (
+        <div 
+          className={`menu-overlay ${overlayVisible ? 'visible' : ''}`} 
+          onClick={toggleMenu}
+        ></div>
+      )}
 
       {/* Auth Modal */}
       {showAuthModal && (

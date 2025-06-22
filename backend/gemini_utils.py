@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 from google import genai
 from PIL import Image
 import io
+import logging
+
+logger = logging.getLogger("gemini_utils")
 
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
@@ -18,18 +21,20 @@ def analyze_image(image_bytes: bytes):
     Returns:
         JSON response from Gemini analysis.
     """
-    print("\n--- [START IMAGE ANALYSIS] ---")
+    logger.info("\n--- [START IMAGE ANALYSIS] ---")
     try:
-        print(f"[ANALYSIS] Received {len(image_bytes) / 1024:.2f} KB of image data.")
+        logger.info(f"[ANALYSIS] Received {len(image_bytes) / 1024:.2f} KB of image data.")
         
-        print("[ANALYSIS] Step 1: Loading bytes into a PIL Image object...")
+        logger.info("[ANALYSIS] Step 1: Loading bytes into a PIL Image object...")
         image = Image.open(io.BytesIO(image_bytes))
-        print(f"[ANALYSIS] Step 1 SUCCESS: Image loaded. Format: {image.format}, Size: {image.size}")
+        logger.info(f"[ANALYSIS] Step 1 SUCCESS: Image loaded. Format: {image.format}, Size: {image.size}")
         
-        prompt = """
+        # Food analysis prompt
+        food_prompt = """
     Analyze this food image and return a JSON response with the following structure:
     {
         "food_name": "Name of the food item",
+        "estimated_size": "estimated product size (100g, 100mL, etc.)",
         "nutrition_data": {
             "calories": "estimated calories per serving",
             "protein": "protein content in grams",
@@ -49,32 +54,40 @@ def analyze_image(image_bytes: bytes):
     }
 
     Please provide realistic estimates based on what you can see in the image.
-    Make sure that the ingridents and values are based off of Ontario, Canada.
+    Make sure that the ingredients and values are based off of Ontario, Canada.
     If you cannot determine certain values, use "unknown" for that field.
+    
     Return only the JSON response, no additional text.
     """
 
-        print("[ANALYSIS] Step 2: Sending request to Google Gemini API...")
-        response = client.models.generate_content(
-                model="gemini-2.5-flash-lite-preview-06-17", contents=[prompt, image]
+        logger.info("[ANALYSIS] Step 2: Sending request to Google Gemini API for food analysis...")
+        food_response = client.models.generate_content(
+                model="gemini-2.5-flash-lite-preview-06-17", contents=[food_prompt, image]
         )
-        print("[ANALYSIS] Step 2 SUCCESS: Received response from Gemini.")
+        logger.info("[ANALYSIS] Step 2 SUCCESS: Received food analysis from Gemini.")
 
-        response_text = clean_response(response.text)
-        print("[ANALYSIS] Step 3: Response content cleaned successfully.")
+        food_response_text = clean_response(food_response.text)
+        logger.info(f"[ANALYSIS DEBUG] Food analysis response: {food_response_text}")
 
         try:
-            result = json.loads(response_text)
-            print("[ANALYSIS] Step 4 SUCCESS: JSON parsed. Analysis complete.")
-            print("--- [END IMAGE ANALYSIS] ---\n")
+            result = json.loads(food_response_text)
+            logger.info("[ANALYSIS] Step 3 SUCCESS: Food analysis JSON parsed.")
+            
+            # Debug: Print the result structure
+            logger.info(f"[ANALYSIS DEBUG] Result keys: {list(result.keys())}")
+            logger.info(f"[ANALYSIS DEBUG] Food name: {result.get('food_name')}")
+            logger.info(f"[ANALYSIS DEBUG] Estimated size: {result.get('estimated_size')}")
+            
+            logger.info("--- [END IMAGE ANALYSIS] ---\n")
             return result
+                
         except json.JSONDecodeError:
-            print("[ANALYSIS ERROR] Gemini returned malformed JSON.")
-            return {"raw_response": response_text}
+            logger.warning("[ANALYSIS ERROR] Food analysis returned malformed JSON.")
+            return {"raw_response": food_response_text}
 
     except Exception as e:
-        print(f"[ANALYSIS CRITICAL ERROR] An exception occurred: {e}")
-        print("--- [END IMAGE ANALYSIS WITH ERROR] ---\n")
+        logger.error(f"[ANALYSIS CRITICAL ERROR] An exception occurred: {e}")
+        logger.info("--- [END IMAGE ANALYSIS WITH ERROR] ---\n")
         return {"error": str(e)}
 
 
@@ -115,18 +128,18 @@ def analyze_ingredient(ingredient_name):
         try:
             return json.loads(response_text)
         except json.JSONDecodeError:
-            print("[WARNING] Gemini returned malformed JSON.")
+            logger.warning("[WARNING] Gemini returned malformed JSON.")
             return {"raw_response": response_text}
 
     except Exception as e:
-        print(f"[ERROR] Failed to analyze ingredient: {e}")
+        logger.error(f"[ERROR] Failed to analyze ingredient: {e}")
         return {"error": str(e)}
 
 
 def clean_response(response_text):
     # Remove markdown code fences if present
     if response_text.startswith("```json"):
-        response_text = response_text[len("```json"):]
+        response_text = response_text[len("```json") :]
 
     if response_text.endswith("```"):
         response_text = response_text[:-3]

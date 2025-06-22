@@ -35,6 +35,6 @@ Write-Host "Starting FastAPI server..." -ForegroundColor Green
 Write-Host "Server will be available at: http://localhost:8000" -ForegroundColor Cyan
 Write-Host "Swagger UI will be available at: http://localhost:8000/docs" -ForegroundColor Cyan
 Write-Host ""
-python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000 --log-level info
 
 Read-Host "Press Enter to exit" 

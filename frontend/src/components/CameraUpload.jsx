@@ -6,7 +6,7 @@ const CameraUpload = ({ onUploadStart, onUploadComplete, onUploadError }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
-  const API_BASE = 'http://127.0.0.1:8000';
+  const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
