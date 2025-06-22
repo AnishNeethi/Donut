@@ -2,7 +2,8 @@ from passlib.context import CryptContext
 from jose import jwt
 import os
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use sha256_crypt instead of bcrypt to avoid version compatibility issues
+pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
