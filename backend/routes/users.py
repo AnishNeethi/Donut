@@ -47,7 +47,7 @@ async def login(user: UserLogin):
             raise HTTPException(status_code=401, detail="Invalid credentials")
         
         # Create access token
-        access_token = create_access_token(data={"sub": user.email})
+        access_token = create_access_token(user.email)
         return {"access_token": access_token, "token_type": "bearer"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

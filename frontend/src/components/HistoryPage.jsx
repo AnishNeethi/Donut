@@ -10,7 +10,7 @@ const HistoryPage = () => {
   const [filter, setFilter] = useState('avoided'); // 'eaten' or 'avoided'
   const [token, setToken] = useState(localStorage.getItem('token') || '');
 
-  const API_BASE = 'http://127.0.0.1:8000';
+  const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
   useEffect(() => {
     if (token) {
