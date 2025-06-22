@@ -1,0 +1,160 @@
+.history-item {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 15px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.history-item:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.item-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.summary-info .summary-title {
+  font-size: 1.4rem;
+  font-weight: normal;
+  margin: 0 0 5px 0;
+}
+
+.summary-info .summary-date {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin: 0;
+}
+
+.summary-details {
+  display: flex;
+  gap: 25px;
+  text-align: center;
+}
+
+.detail-item span {
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.detail-item strong {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.expand-btn {
+  background: none;
+  border: 2px solid #000;
+  border-radius: 20px;
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.history-item:hover .expand-btn {
+  background-color: #000;
+  color: #FFB6C1;
+}
+
+.item-details {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  animation: slideInDetails 0.4s ease;
+}
+
+@keyframes slideInDetails {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.item-details h4 {
+  font-size: 1.2rem;
+  font-weight: normal;
+  margin: 0 0 15px 0;
+}
+
+.nutrition-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.nutrition-detail-item {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.nutrition-detail-item span {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  opacity: 0.8;
+}
+
+.nutrition-detail-item strong {
+  font-size: 1rem;
+}
+
+.ingredients-list .ingredient-tag {
+  background-color: rgba(0, 0, 0, 0.08);
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  display: inline-block;
+  margin: 3px;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .item-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .summary-details {
+    width: 100%;
+    justify-content: space-around;
+  }
+  
+  .expand-btn {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .history-item {
+    padding: 15px;
+  }
+
+  .summary-info .summary-title {
+    font-size: 1.2rem;
+  }
+
+  .detail-item strong {
+    font-size: 1.1rem;
+  }
+  
+  .nutrition-details-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+} 

@@ -5,29 +5,29 @@ import HealthResults from './HealthResults';
 import DonutScene from './DonutScene';
 import AuthModal from './AuthModal';
 import './Landing.css';
+import { Link } from 'react-router-dom';
 
-  const Landing = () => {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [currentView, setCurrentView] = useState('landing'); // landing, upload, loading, results, donut-scene
-    const [analysisData, setAnalysisData] = useState(null);
-    const [showAuthModal, setShowAuthModal] = useState(false);
-    const [titleVisible, setTitleVisible] = useState(true);
-    const [overlayVisible, setOverlayVisible] = useState(false);
+const Landing = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentView, setCurrentView] = useState('landing'); // landing, upload, loading, results, donut-scene
+  const [analysisData, setAnalysisData] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [titleVisible, setTitleVisible] = useState(true);
+  const [overlayVisible, setOverlayVisible] = useState(false);
 
-    const toggleMenu = () => {
-      if (!isMenuOpen) {
-        // Opening menu
-        setIsMenuOpen(true);
-        setTimeout(() => setOverlayVisible(true), 10); // Small delay for smooth transition
-      } else {
-        // Closing menu
-        setOverlayVisible(false);
-        setTimeout(() => setIsMenuOpen(false), 300); // Wait for transition to complete
-      }
-    };
+  const toggleMenu = () => {
+    if (!isMenuOpen) {
+      // Opening menu
+      setIsMenuOpen(true);
+      setTimeout(() => setOverlayVisible(true), 10); // Small delay for smooth transition
+    } else {
+      // Closing menu
+      setOverlayVisible(false);
+      setTimeout(() => setIsMenuOpen(false), 300); // Wait for transition to complete
+    }
+  };
 
   const handleCameraClick = () => {
-
     document.getElementById('fileInput').click();
   };
 
@@ -64,7 +64,7 @@ import './Landing.css';
 
   const handleUploadError = (error) => {
     console.error('Upload error:', error);
-    setCurrentView('upload');
+    setCurrentView('landing'); // Go back to landing on error
   };
 
   const handleSaveData = () => {
@@ -173,7 +173,7 @@ import './Landing.css';
       />
 
       {/* Hamburger Menu Button */}
-      <button className={`hamburger-menu ${isMenuOpen ? 'active' : ''}`} onClick={toggleMenu}>
+      <button className={`hamburger-menu ${isMenuOpen ? 'menu-open' : ''}`} onClick={toggleMenu}>
         <div className="hamburger-line"></div>
         <div className="hamburger-line"></div>
         <div className="hamburger-line"></div>
@@ -186,13 +186,13 @@ import './Landing.css';
         <div className="menu-content">
           <nav className="menu-nav">
             <ul>
-              <li><a href="#home" onClick={handleBackToHome}>home</a></li>
-              <li><a href="#user">user</a></li>
-              <li><a href="#settings">settings</a></li>
-              <li><a href="#history">history</a></li>
-              <li><a href="#feature1">feature 1</a></li>
-              <li><a href="#feature2">feature 2</a></li>
-              <li><a href="#feature3">feature 3</a></li>
+              <li><Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link></li>
+              <li><Link to="/history" onClick={() => setIsMenuOpen(false)}>History</Link></li>
+              <li><a href="#user">User</a></li>
+              <li><a href="#settings">Settings</a></li>
+              <li><a href="#feature1">Feature 1</a></li>
+              <li><a href="#feature2">Feature 2</a></li>
+              <li><a href="#feature3">Feature 3</a></li>
             </ul>
           </nav>
         </div>

@@ -1,8 +1,7 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Landing from './components/Landing'
-import DonutDemo from './components/DonutDemo'
-import AuthPage from './components/AuthPage'
+import HistoryPage from './components/HistoryPage'
 import './App.css'
 
 function App() {
@@ -11,8 +10,7 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/donut-demo" element={<DonutDemo />} />
-          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/history" element={<HistoryPage />} />
         </Routes>
       </div>
     </Router>
