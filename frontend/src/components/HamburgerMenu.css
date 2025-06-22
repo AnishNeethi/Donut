@@ -29,6 +29,20 @@
   border-radius: 2px;
 }
 
+/* Hamburger state (closed) - black lines, white on hover */
+.hamburger-menu:hover .hamburger-line {
+  background-color: #fff;
+}
+
+/* X state (open) - pink lines, white on hover */
+.hamburger-menu.menu-open .hamburger-line {
+  background-color: #FFB6C1;
+}
+
+.hamburger-menu.menu-open:hover .hamburger-line {
+  background-color: #fff;
+}
+
 .hamburger-menu.menu-open .hamburger-line:nth-child(1) {
   transform: rotate(45deg) translate(6px, 6px);
 }
@@ -39,10 +53,6 @@
 
 .hamburger-menu.menu-open .hamburger-line:nth-child(3) {
   transform: rotate(-45deg) translate(6px, -6px);
-}
-
-.hamburger-menu:hover .hamburger-line {
-  background-color: #FFB6C1;
 }
 
 /* Mobile Responsiveness */

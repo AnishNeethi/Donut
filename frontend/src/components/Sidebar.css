@@ -17,12 +17,22 @@
 
 .menu-content {
   padding: 80px 20px 20px 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-nav {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .menu-nav ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  flex: 1;
 }
 
 .menu-nav li {
@@ -42,6 +52,32 @@
 
 .menu-nav a:hover {
   background-color: rgba(255, 182, 193, 0.1);
+  color: #fff;
+  transform: translateX(5px);
+}
+
+/* Profile section at bottom */
+.profile-section {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 182, 193, 0.3);
+}
+
+.profile-link {
+  display: block;
+  padding: 15px 20px;
+  color: #FFB6C1;
+  text-decoration: none;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  text-align: center;
+  background-color: rgba(255, 182, 193, 0.1);
+}
+
+.profile-link:hover {
+  background-color: rgba(255, 182, 193, 0.2);
   color: #fff;
   transform: translateX(5px);
 }
@@ -78,6 +114,11 @@
   }
   
   .menu-nav a {
+    font-size: 1rem;
+    padding: 10px 12px;
+  }
+  
+  .profile-link {
     font-size: 1rem;
     padding: 10px 12px;
   }
