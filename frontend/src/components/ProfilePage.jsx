@@ -22,8 +22,16 @@ const ProfilePage = () => {
   }, []);
 
   const handleLogout = () => {
-    // For now, this button does nothing as requested
-    console.log('Logout button clicked');
+    // Clear all auth-related data from localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    
+    // Reset state
+    setIsAuthenticated(false);
+    setUsername('');
+    
+    // Redirect to home page
+    window.location.href = '/';
   };
 
   const toggleMenu = () => {
@@ -42,8 +50,8 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-page">
-      <HamburgerMenu isOpen={isMenuOpen} onClick={toggleMenu} />
-      <Sidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <HamburgerMenu isOpen={isMenuOpen} toggleMenu={toggleMenu} />
+      <Sidebar isOpen={isMenuOpen} onClose={toggleMenu} />
       
       <div className="profile-content">
         {isAuthenticated ? (

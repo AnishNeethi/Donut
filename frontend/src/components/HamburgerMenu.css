@@ -8,7 +8,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  z-index: 1000;
+  z-index: 1002;
   display: flex;
   flex-direction: column;
   justify-content: center;

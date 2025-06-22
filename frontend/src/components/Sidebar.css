@@ -5,8 +5,8 @@
   left: -300px;
   width: 300px;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8);
-  z-index: 999;
+  background-color: rgba(0, 0, 0, 0.95);
+  z-index: 1005;
   transition: left 0.3s ease;
   backdrop-filter: blur(10px);
 }
@@ -89,8 +89,8 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8);
-  z-index: 998;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1004;
   transition: opacity 0.3s ease;
   opacity: 0;
 }
