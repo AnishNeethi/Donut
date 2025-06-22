@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './HealthResults.css';
 import LoginRegisterModal from './LoginRegisterModal';
+import imageCompression from 'browser-image-compression';
 
 const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -16,6 +17,50 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
   const isLoggedIn = localStorage.getItem('token') !== null;
 
   const API_BASE = 'https://donut-backend-o6ef.onrender.com';
+
+  const handleAnalyzeAnother = async (file) => {
+    if (file && !loading) {
+      setLoading(true);
+      
+      const options = {
+        maxSizeMB: 0.07,
+        maxWidthOrHeight: 512,
+        useWebWorker: true,
+        fileType: 'image/jpeg',
+      };
+
+      try {
+        const compressedFile = await imageCompression(file, options);
+        const formData = new FormData();
+        formData.append('file', compressedFile, file.name);
+
+        const response = await fetch(`${API_BASE}/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Set currentView to 'donut-scene' in localStorage to trigger the animation
+          localStorage.setItem('currentView', 'donut-scene');
+          // Reload the page to show the donut animation with the new data
+          window.location.reload();
+        } else {
+          setMessage(data.error || 'upload failed');
+        }
+      } catch (error) {
+        console.error('Compression or Upload Error:', error);
+        setMessage('an error occurred during compression or upload.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleCameraClick = () => {
+    document.getElementById('fileInput').click();
+  };
 
   if (!analysisData) return null;
 
@@ -62,10 +107,6 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
     }
     
     setIngredientLoading(false);
-  };
-
-  const handleCameraClick = () => {
-    document.getElementById('fileInput').click();
   };
 
   const categories = [
@@ -158,7 +199,7 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
         onChange={(e) => {
           const file = e.target.files[0];
           if (file) {
-            onBackToHome(); // This will trigger the parent component's file handling
+            handleAnalyzeAnother(file);
           }
         }}
         style={{ display: 'none' }}
@@ -207,13 +248,6 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
                 disabled={loading || saveCompleted}
               >
                 {loading ? 'saving...' : 'save to avoided'}
-              </button>
-              <button 
-                className="save-btn dont-save" 
-                onClick={onBackToHome}
-                disabled={loading || saveCompleted}
-              >
-                don't save to history
               </button>
             </div>
             {message && (
