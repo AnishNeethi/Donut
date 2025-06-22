@@ -27,6 +27,7 @@ import './Landing.css';
     };
 
   const handleCameraClick = () => {
+
     document.getElementById('fileInput').click();
   };
 
