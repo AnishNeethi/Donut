@@ -6,19 +6,51 @@ import DonutScene from './DonutScene';
 import AuthModal from './AuthModal';
 import './Landing.css';
 
-const Landing = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentView, setCurrentView] = useState('landing'); // landing, upload, loading, results, donut-scene
-  const [analysisData, setAnalysisData] = useState(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [titleVisible, setTitleVisible] = useState(true);
+  const Landing = () => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [currentView, setCurrentView] = useState('landing'); // landing, upload, loading, results, donut-scene
+    const [analysisData, setAnalysisData] = useState(null);
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const [titleVisible, setTitleVisible] = useState(true);
+    const [overlayVisible, setOverlayVisible] = useState(false);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+    const toggleMenu = () => {
+      if (!isMenuOpen) {
+        // Opening menu
+        setIsMenuOpen(true);
+        setTimeout(() => setOverlayVisible(true), 10); // Small delay for smooth transition
+      } else {
+        // Closing menu
+        setOverlayVisible(false);
+        setTimeout(() => setIsMenuOpen(false), 300); // Wait for transition to complete
+      }
+    };
 
   const handleCameraClick = () => {
-    setCurrentView('upload');
+
+    document.getElementById('fileInput').click();
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      console.log('Selected file:', file);
+      handleUploadStart();
+      // Here you can process the file directly
+      // For now, we'll simulate the upload process
+      setTimeout(() => {
+        // Mock data for demonstration
+        const mockData = {
+          nutrition_data: {
+            sugar: '25',
+            calories: '450',
+            fat: '12',
+            protein: '8'
+          }
+        };
+        handleUploadComplete(mockData);
+      }, 2000);
+    }
   };
 
   const handleUploadStart = () => {
@@ -131,8 +163,17 @@ const Landing = () => {
 
   return (
     <div className="landing-container">
+      {/* Hidden file input */}
+      <input 
+        type="file" 
+        id="fileInput" 
+        accept="image/*" 
+        style={{ display: 'none' }} 
+        onChange={handleFileSelect}
+      />
+
       {/* Hamburger Menu Button */}
-      <button className="hamburger-menu" onClick={toggleMenu}>
+      <button className={`hamburger-menu ${isMenuOpen ? 'active' : ''}`} onClick={toggleMenu}>
         <div className="hamburger-line"></div>
         <div className="hamburger-line"></div>
         <div className="hamburger-line"></div>
@@ -145,20 +186,25 @@ const Landing = () => {
         <div className="menu-content">
           <nav className="menu-nav">
             <ul>
-              <li><a href="#home" onClick={handleBackToHome}>Home</a></li>
-              <li><a href="#user">User</a></li>
-              <li><a href="#settings">Settings</a></li>
-              <li><a href="#history">History</a></li>
-              <li><a href="#feature1">Feature 1</a></li>
-              <li><a href="#feature2">Feature 2</a></li>
-              <li><a href="#feature3">Feature 3</a></li>
+              <li><a href="#home" onClick={handleBackToHome}>home</a></li>
+              <li><a href="#user">user</a></li>
+              <li><a href="#settings">settings</a></li>
+              <li><a href="#history">history</a></li>
+              <li><a href="#feature1">feature 1</a></li>
+              <li><a href="#feature2">feature 2</a></li>
+              <li><a href="#feature3">feature 3</a></li>
             </ul>
           </nav>
         </div>
       </div>
 
       {/* Overlay */}
-      {isMenuOpen && <div className="menu-overlay" onClick={toggleMenu}></div>}
+      {isMenuOpen && (
+        <div 
+          className={`menu-overlay ${overlayVisible ? 'visible' : ''}`} 
+          onClick={toggleMenu}
+        ></div>
+      )}
 
       {/* Auth Modal */}
       {showAuthModal && (
