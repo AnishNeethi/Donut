@@ -9,7 +9,7 @@ const HistoryItem = ({ item }) => {
   }
 
   const { food_name, nutrition_data, ingredients } = item.analysis;
-  const consumed_date = new Date(item.created_at).toLocaleDateString();
+  const consumed_date = new Date(item.timestamp).toLocaleDateString();
 
   return (
     <div className={`history-item ${isExpanded ? 'expanded' : ''}`} onClick={() => setIsExpanded(!isExpanded)}>
