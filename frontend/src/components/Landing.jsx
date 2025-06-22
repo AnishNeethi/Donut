@@ -25,7 +25,7 @@ const Landing = () => {
   const [buttonSlideOut, setButtonSlideOut] = useState(false);
   const [titleFadeOut, setTitleFadeOut] = useState(false);
 
-  const API_BASE = 'https://donut-backend-o6ef.onrender.com';
+  const API_BASE = 'http://127.0.0.1:8000';
 
   // Reset component state when navigating to home route
   useEffect(() => {

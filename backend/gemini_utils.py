@@ -5,11 +5,48 @@ from google import genai
 from PIL import Image
 import io
 import logging
+import random
+from google.cloud import texttospeech
+
+# Load environment variables
+load_dotenv()
+
+# Initialize clients with credentials
+# Gemini client
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+# Google Cloud TTS client, which will automatically find the application default credentials
+tts_client = texttospeech.TextToSpeechClient()
 
 logger = logging.getLogger("gemini_utils")
 
-load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+# Array of concerned expressions for low health ratings
+CONCERNED_EXPRESSIONS = [
+    "yikes",
+    "ruh-roh", 
+    "uh-oh",
+    "hmm",
+    "interesting...",
+    "well then",
+    "oh?",
+    "okay...",
+    "alrighty",
+    "so that happened",
+    "huh",
+    "curious",
+    "that's something",
+    "well, okay",
+    "noted",
+    "oh, I see",
+    "that's one way to go",
+    "got it",
+    "huh, okay",
+    "well, that's different",
+    "if you say so",
+    "alright then",
+    "oh boy",
+    "oh man",
+    "whoops"
+]
 
 def analyze_image(image_bytes: bytes):
     """
@@ -145,3 +182,59 @@ def clean_response(response_text):
         response_text = response_text[:-3]
 
     return response_text.strip()
+
+def get_pronunciation_audio(ingredient_name: str, is_concerned: bool = False):
+    """
+    Generate pronunciation audio for an ingredient using Google Cloud Text-to-Speech.
+    
+    Args:
+        ingredient_name: The name of the ingredient to pronounce
+        is_concerned: If True, adds a concerned expression and modifies voice prosody
+    
+    Returns:
+        Audio bytes in MP3 format
+    """
+    try:
+        # Step 1: Construct the text to speak directly from the ingredient name.
+        # We no longer ask Gemini for phonetics, as the TTS engine is very capable.
+        text_to_speak = ingredient_name
+        if is_concerned:
+            # Add a random concerned expression for more variety
+            concerned_expression = random.choice(CONCERNED_EXPRESSIONS)
+            text_to_speak = f"{ingredient_name}. {concerned_expression}"
+
+        # Step 2: Generate audio using Google Cloud TTS for higher quality
+        # The tts_client is already initialized globally
+        
+        # If concerned, wrap in SSML for prosody changes
+        if is_concerned:
+            # Studio voices do not support the 'pitch' attribute, but we can slow the rate.
+            ssml_text = f'<speak><prosody rate="slow">{text_to_speak}</prosody></speak>'
+            synthesis_input = texttospeech.SynthesisInput(ssml=ssml_text)
+        else:
+            synthesis_input = texttospeech.SynthesisInput(text=text_to_speak)
+
+        # Build the voice request, select the language code ("en-US") and the voice name
+        # Using a high-quality Studio voice
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="en-US", 
+            name="en-US-Studio-O"
+        )
+
+        # Select the type of audio file you want
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.MP3
+        )
+
+        # Perform the text-to-speech request
+        # The SDK will automatically use the project_id from the environment if available
+        # or from the gcloud config.
+        response = tts_client.synthesize_speech(
+            input=synthesis_input, voice=voice, audio_config=audio_config
+        )
+        
+        return response.audio_content
+        
+    except Exception as e:
+        logger.error(f"[ERROR] Failed to generate pronunciation audio: {e}")
+        raise e

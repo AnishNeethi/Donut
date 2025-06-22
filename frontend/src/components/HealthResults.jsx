@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './HealthResults.css';
 import LoginRegisterModal from './LoginRegisterModal';
 import imageCompression from 'browser-image-compression';
+import PronunciationPlayer from './PronunciationPlayer';
 
 const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -157,8 +158,8 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
         return (
           <div className="ingredients-list">
             {category.data.map((ingredient, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="ingredient-item"
                 onClick={() => handleIngredientClick(ingredient)}
               >
@@ -291,7 +292,10 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
         <div className="ingredient-popup-overlay" onClick={closeIngredientPopup}>
           <div className="ingredient-popup" onClick={e => e.stopPropagation()}>
             <button className="close-btn" onClick={closeIngredientPopup}>×</button>
-            <h3>{selectedIngredient}</h3>
+            <div className="popup-header">
+              <h3>{selectedIngredient}</h3>
+              <PronunciationPlayer ingredientName={selectedIngredient} healthRating={50} />
+            </div>
             
             {ingredientLoading && (
               <div className="loading-message">analyzing ingredient...</div>
