@@ -69,6 +69,10 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
   const foodName = analysisData.food_name || 'Unknown Food';
 
   const handleIngredientClick = (ingredient) => {
+    if (!localStorage.getItem('token')) {
+      setShowLoginModal(true);
+      return;
+    }
     setSelectedIngredient(ingredient);
     setIsIngredientPopupOpen(true);
     fetchIngredientData(ingredient);
@@ -86,11 +90,18 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
     setIngredientError(null);
     
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIngredientError('Please log in to analyze ingredients');
+        setIngredientLoading(false);
+        return;
+      }
+
       const response = await fetch(`${API_BASE}/analyze-ingredient`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ ingredient_name: ingredient }),
       });
@@ -100,9 +111,13 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
       if (response.ok) {
         setIngredientData(data);
       } else {
+        // Log the error details for debugging
+        console.error('Ingredient analysis failed:', data);
         setIngredientError(data.detail || 'Failed to analyze ingredient');
       }
     } catch (error) {
+      // Log the actual error for debugging
+      console.error('Ingredient analysis error:', error);
       setIngredientError('Error analyzing ingredient');
     }
     
