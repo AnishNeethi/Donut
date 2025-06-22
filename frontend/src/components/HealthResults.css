@@ -201,34 +201,58 @@
 
 /* Save Section */
 .save-section {
+  margin-top: 30px;
   text-align: center;
-  padding: 20px;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 15px;
 }
 
 .save-prompt {
   font-size: 1.1rem;
   color: rgba(0, 0, 0, 0.8);
-  margin: 0 0 15px 0;
-  font-family: Arial, sans-serif;
+  margin-bottom: 15px;
+}
+
+.save-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 15px;
+  margin: 0 auto;
 }
 
 .save-btn {
-  padding: 12px 30px;
-  background-color: rgba(0, 0, 0, 0.8);
-  border: 3px solid #FFB6C1;
+  padding: 10px 20px;
   border-radius: 25px;
-  color: #FFB6C1;
-  font-family: Arial, sans-serif;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  font-weight: normal;
   cursor: pointer;
   transition: all 0.3s ease;
+  border: 2px solid rgba(0, 0, 0, 0.8);
+  font-family: Arial, sans-serif;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  min-width: 120px;
 }
 
 .save-btn:hover {
-  background-color: #fff;
+  background-color: white;
+  color: rgba(0, 0, 0, 0.8);
+  transform: translateY(-2px);
+}
+
+.save-btn.eaten,
+.save-btn.avoided,
+.save-btn.dont-save,
+.save-btn.login {
+  background-color: rgba(0, 0, 0, 0.8);
   border-color: rgba(0, 0, 0, 0.8);
+  color: white;
+}
+
+.save-btn.eaten:hover,
+.save-btn.avoided:hover,
+.save-btn.dont-save:hover,
+.save-btn.login:hover {
+  background-color: white;
   color: rgba(0, 0, 0, 0.8);
 }
 

@@ -237,13 +237,12 @@ body, html {
 
 /* Donut Scene Fullscreen */
 .donut-scene-fullscreen {
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
-  width: 100%;
-  height: auto;
-  min-height: 100%;
-  background: #FFB6C1;
+  width: 100vw;
+  min-height: 100vh;
+  background: transparent;
   z-index: 10;
   overflow-y: auto;
   overflow-x: hidden;
@@ -253,18 +252,21 @@ body, html {
   position: relative;
   width: 100%;
   height: 100vh;
-  background: #FFB6C1;
+  background: transparent;
 }
 
 .detailed-results-section {
   width: 100%;
   min-height: 100vh;
-  background: #FFB6C1;
+  background: transparent;
   padding: 40px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  scroll-margin-top: 20px;
+  position: relative;
+  z-index: 11;
 }
 
 .donut-overlay-info {

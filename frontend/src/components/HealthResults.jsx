@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import './HealthResults.css';
 
-const HealthResults = ({ analysisData, onSaveData }) => {
+const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [isIngredientPopupOpen, setIsIngredientPopupOpen] = useState(false);
   const [ingredientData, setIngredientData] = useState(null);
   const [ingredientLoading, setIngredientLoading] = useState(false);
   const [ingredientError, setIngredientError] = useState(null);
+  const isLoggedIn = localStorage.getItem('token') !== null;
 
   const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
@@ -182,6 +183,37 @@ const HealthResults = ({ analysisData, onSaveData }) => {
     }
   };
 
+  const handleSave = async (consumed) => {
+    if (!isLoggedIn) {
+      onSaveData(); // This will trigger the auth modal
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/save-analysis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          filename: 'food-analysis.jpg',
+          analysis: analysisData,
+          consumed: consumed
+        }),
+      });
+
+      if (response.ok) {
+        // After successful save, go back to home
+        onBackToHome();
+      } else {
+        console.error('Failed to save analysis');
+      }
+    } catch (error) {
+      console.error('Error saving analysis:', error);
+    }
+  };
+
   return (
     <div className="health-results">
       <div className="food-title">
@@ -210,10 +242,28 @@ const HealthResults = ({ analysisData, onSaveData }) => {
       )}
 
       <div className="save-section">
-        <p className="save-prompt">want to save this analysis to your health history?</p>
-        <button className="save-btn" onClick={onSaveData}>
-          save to profile
-        </button>
+        {isLoggedIn ? (
+          <>
+            <p className="save-prompt">what would you like to do with this analysis?</p>
+            <div className="save-buttons">
+              <button className="save-btn eaten" onClick={() => handleSave(true)}>
+                save to eaten
+              </button>
+              <button className="save-btn avoided" onClick={() => handleSave(false)}>
+                save to avoided
+              </button>
+              <button className="save-btn dont-save" onClick={onBackToHome}>
+                don't save to history
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="save-buttons">
+            <button className="save-btn" onClick={() => onSaveData()}>
+              Login to Save History
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Ingredient Popup */}
