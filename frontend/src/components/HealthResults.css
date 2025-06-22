@@ -481,15 +481,19 @@
 @media (max-width: 768px) {
   .ingredient-popup {
     width: 95%;
+    max-height: 65vh;
     padding: 20px;
+    margin: 10px;
   }
 
   .ingredient-popup h3 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
   }
 
   .detail-section {
     padding: 12px;
+    margin-bottom: 12px;
   }
 
   .detail-section h4 {
