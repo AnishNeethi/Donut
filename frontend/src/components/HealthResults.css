@@ -184,20 +184,19 @@
 }
 
 .ingredient-item {
+  padding: 8px 12px;
   background-color: rgba(255, 255, 255, 0.1);
-  padding: 12px 18px;
-  border-radius: 8px;
+  border: 1px solid #FFB6C1;
+  border-radius: 15px;
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
+  transition: all 0.3s ease;
 }
 
 .ingredient-item:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.02);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #FFB6C1;
 }
 
 /* Save Section */
@@ -373,10 +372,7 @@
   width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -407,17 +403,6 @@
 
 .close-btn:hover {
   background-color: rgba(0, 0, 0, 0.1);
-}
-
-.popup-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.popup-header h3 {
-  margin: 0;
 }
 
 .ingredient-popup h3 {
@@ -518,22 +503,4 @@
   .detail-section p {
     font-size: 0.9rem;
   }
-}
-
-.popup-title {
-  margin: 0;
-  font-size: 2em;
-  font-weight: bold;
-  color: #333;
-}
-
-.popup-title-container {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 10px;
-}
-
-.popup-description {
-  font-size: 1.1em;
 } 
