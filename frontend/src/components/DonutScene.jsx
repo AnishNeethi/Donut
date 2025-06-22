@@ -27,8 +27,8 @@ const DonutScene = ({ sugarCount = 0 }) => {
   }, [sugarCount])
 
   return (
-    <div className="donut-scene" style={{ width: '100%', height: '100vh' }}>
-      <Canvas camera={{ position: [0, 5, 8], fov: 45 }}>
+    <div className="donut-scene" style={{ width: '100%', height: '100vh', background: 'transparent' }}>
+      <Canvas camera={{ position: [0, 5, 8], fov: 45 }} gl={{ alpha: true }}>
         {/* Lighting */}
         <ambientLight intensity={0.4} />
         <pointLight position={[10, 10, 10]} intensity={1} />
@@ -41,7 +41,7 @@ const DonutScene = ({ sugarCount = 0 }) => {
         />
 
         {/* Environment for better reflections */}
-        <Environment preset="sunset" />
+        <Environment preset="city" background={false} />
 
         {/* Camera controls */}
         <OrbitControls enablePan={false} enableZoom={false} />
@@ -57,12 +57,6 @@ const DonutScene = ({ sugarCount = 0 }) => {
           ))}
         </Physics>
       </Canvas>
-      
-      {sugarCount > 0 && (
-        <div className="sugar-info">
-          <p>sugar: {sugarCount}g = {Math.ceil(sugarCount / 10)} donuts!</p>
-        </div>
-      )}
     </div>
   )
 }
@@ -73,7 +67,11 @@ const Ground = () => {
     <RigidBody type="fixed">
       <mesh receiveShadow position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[20, 20]} />
-        <meshStandardMaterial color="#FFB6C1" />
+        <meshStandardMaterial 
+          transparent={true}
+          opacity={0}
+          depthWrite={false}
+        />
       </mesh>
     </RigidBody>
   )

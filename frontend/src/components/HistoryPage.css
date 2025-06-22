@@ -12,6 +12,13 @@
   font-family: Arial, sans-serif;
   box-sizing: border-box;
   z-index: 1;
+  overflow: auto;
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.history-page::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }
 
 /* Override global body styles for this page */
@@ -21,7 +28,8 @@ body {
   display: block !important;
   place-items: unset !important;
   min-height: 100vh !important;
-  overflow: hidden !important;
+  overflow: auto !important;
+  height: 100% !important;
 }
 
 /* Override root styles for this page */
@@ -30,8 +38,10 @@ body {
   margin: 0 !important;
   padding: 0 !important;
   text-align: unset !important;
-  height: 100vh !important;
-  width: 100vw !important;
+  min-height: 100vh !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: auto !important;
 }
 
 .history-header {
@@ -72,7 +82,7 @@ body {
 
 .history-visualization {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 }
 
 .sugar-summary h2 {

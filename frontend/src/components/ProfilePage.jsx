@@ -22,8 +22,16 @@ const ProfilePage = () => {
   }, []);
 
   const handleLogout = () => {
-    // For now, this button does nothing as requested
-    console.log('Logout button clicked');
+    // Remove auth data from localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    
+    // Update state
+    setIsAuthenticated(false);
+    setUsername('');
+    
+    // Close the menu if it's open
+    setIsMenuOpen(false);
   };
 
   const toggleMenu = () => {

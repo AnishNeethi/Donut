@@ -1,8 +1,21 @@
 import React, { useState } from 'react';
 import './HealthResults.css';
+import LoginRegisterModal from './LoginRegisterModal';
 
-const HealthResults = ({ analysisData, onSaveData }) => {
+const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedIngredient, setSelectedIngredient] = useState(null);
+  const [isIngredientPopupOpen, setIsIngredientPopupOpen] = useState(false);
+  const [ingredientData, setIngredientData] = useState(null);
+  const [ingredientLoading, setIngredientLoading] = useState(false);
+  const [ingredientError, setIngredientError] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [saveCompleted, setSaveCompleted] = useState(false);
+  const isLoggedIn = localStorage.getItem('token') !== null;
+
+  const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
   if (!analysisData) return null;
 
@@ -10,46 +23,48 @@ const HealthResults = ({ analysisData, onSaveData }) => {
   const ingredients = analysisData.ingredients || [];
   const foodName = analysisData.food_name || 'Unknown Food';
 
-  // Calculate health rating based on nutrition data
-  const calculateHealthRating = () => {
-    const sugar = parseInt(nutritionData.sugar) || 0;
-    const calories = parseInt(nutritionData.calories) || 0;
-    const protein = parseInt(nutritionData.protein) || 0;
-    const fiber = parseInt(nutritionData.fiber) || 0;
-
-    let score = 100;
-    
-    // Deduct points for high sugar and calories
-    if (sugar > 20) score -= 30;
-    else if (sugar > 10) score -= 15;
-    
-    if (calories > 300) score -= 20;
-    else if (calories > 150) score -= 10;
-    
-    // Add points for protein and fiber
-    if (protein > 10) score += 10;
-    if (fiber > 5) score += 10;
-
-    return Math.max(0, Math.min(100, score));
+  const handleIngredientClick = (ingredient) => {
+    setSelectedIngredient(ingredient);
+    setIsIngredientPopupOpen(true);
+    fetchIngredientData(ingredient);
   };
 
-  const getHealthConcerns = () => {
-    const concerns = [];
-    const sugar = parseInt(nutritionData.sugar) || 0;
-    const calories = parseInt(nutritionData.calories) || 0;
-    const sodium = parseInt(nutritionData.sodium) || 0;
-    const fat = parseInt(nutritionData.total_fat) || 0;
-
-    if (sugar > 15) concerns.push('high sugar content');
-    if (calories > 250) concerns.push('high calorie count');
-    if (sodium > 500) concerns.push('high sodium');
-    if (fat > 15) concerns.push('high fat content');
-    
-    return concerns.length > 0 ? concerns : ['no major health concerns'];
+  const closeIngredientPopup = () => {
+    setIsIngredientPopupOpen(false);
+    setSelectedIngredient(null);
+    setIngredientData(null);
+    setIngredientError(null);
   };
 
-  const healthRating = calculateHealthRating();
-  const healthConcerns = getHealthConcerns();
+  const fetchIngredientData = async (ingredient) => {
+    setIngredientLoading(true);
+    setIngredientError(null);
+    
+    try {
+      const response = await fetch(`${API_BASE}/analyze-ingredient`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ ingredient_name: ingredient }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setIngredientData(data);
+      } else {
+        setIngredientError(data.detail || 'Failed to analyze ingredient');
+      }
+    } catch (error) {
+      setIngredientError('Error analyzing ingredient');
+    }
+    
+    setIngredientLoading(false);
+  };
+
+
 
   const categories = [
     {
@@ -57,18 +72,6 @@ const HealthResults = ({ analysisData, onSaveData }) => {
       title: 'nutrition facts',
       icon: '🍎',
       data: nutritionData
-    },
-    {
-      id: 'health-rating',
-      title: 'health rating',
-      icon: '⭐',
-      data: { rating: healthRating, description: healthRating > 70 ? 'good' : healthRating > 40 ? 'moderate' : 'poor' }
-    },
-    {
-      id: 'health-concerns',
-      title: 'health concerns',
-      icon: '⚠️',
-      data: healthConcerns
     },
     {
       id: 'ingredients',
@@ -92,33 +95,15 @@ const HealthResults = ({ analysisData, onSaveData }) => {
           </div>
         );
       
-      case 'health-rating':
-        return (
-          <div className="health-rating">
-            <div className="rating-circle">
-              <span className="rating-number">{category.data.rating}</span>
-              <span className="rating-max">/100</span>
-            </div>
-            <p className="rating-description">{category.data.description}</p>
-          </div>
-        );
-      
-      case 'health-concerns':
-        return (
-          <div className="concerns-list">
-            {category.data.map((concern, index) => (
-              <div key={index} className="concern-item">
-                {concern}
-              </div>
-            ))}
-          </div>
-        );
-      
       case 'ingredients':
         return (
           <div className="ingredients-list">
             {category.data.map((ingredient, index) => (
-              <div key={index} className="ingredient-item">
+              <div 
+                key={index} 
+                className="ingredient-item"
+                onClick={() => handleIngredientClick(ingredient)}
+              >
                 {ingredient}
               </div>
             ))}
@@ -128,6 +113,36 @@ const HealthResults = ({ analysisData, onSaveData }) => {
       default:
         return null;
     }
+  };
+
+  const handleSave = async (consumed) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE}/save-analysis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          filename: 'food-analysis.jpg',
+          analysis: analysisData,
+          consumed: consumed
+        }),
+      });
+
+      if (response.ok) {
+        setMessage('Successfully saved to history!');
+        setSaveCompleted(true);
+      } else {
+        console.error('Failed to save analysis');
+        setMessage('Failed to save to history');
+      }
+    } catch (error) {
+      console.error('Error saving analysis:', error);
+      setMessage('Error saving to history');
+    }
+    setLoading(false);
   };
 
   return (
@@ -158,11 +173,116 @@ const HealthResults = ({ analysisData, onSaveData }) => {
       )}
 
       <div className="save-section">
-        <p className="save-prompt">want to save this analysis to your health history?</p>
-        <button className="save-btn" onClick={onSaveData}>
-          save to profile
-        </button>
+        {isLoggedIn ? (
+          <>
+            <p className="save-prompt">what would you like to do with this analysis?</p>
+            <div className="save-buttons">
+              <button 
+                className="save-btn eaten" 
+                onClick={() => handleSave(true)} 
+                disabled={loading || saveCompleted}
+              >
+                {loading ? 'saving...' : 'save to eaten'}
+              </button>
+              <button 
+                className="save-btn avoided" 
+                onClick={() => handleSave(false)} 
+                disabled={loading || saveCompleted}
+              >
+                {loading ? 'saving...' : 'save to avoided'}
+              </button>
+              <button 
+                className="save-btn dont-save" 
+                onClick={onBackToHome}
+                disabled={loading || saveCompleted}
+              >
+                don't save to history
+              </button>
+            </div>
+            {message && (
+              <div className={`save-message ${message.includes('Successfully') ? 'success' : 'error'}`}>
+                {message}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="save-buttons">
+            <button className="save-btn" onClick={() => setShowLoginModal(true)}>
+              Login to Save History
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Ingredient Popup */}
+      {isIngredientPopupOpen && (
+        <div className="ingredient-popup-overlay" onClick={closeIngredientPopup}>
+          <div className="ingredient-popup" onClick={e => e.stopPropagation()}>
+            <button className="close-btn" onClick={closeIngredientPopup}>×</button>
+            <h3>{selectedIngredient}</h3>
+            
+            {ingredientLoading && (
+              <div className="loading-message">analyzing ingredient...</div>
+            )}
+            
+            {ingredientError && (
+              <div className="error-message">{ingredientError}</div>
+            )}
+            
+            {ingredientData && (
+              <div className="ingredient-details">
+                <div className="detail-section">
+                  <h4>pronunciation</h4>
+                  <p>{ingredientData.pronunciation}</p>
+                </div>
+                
+                <div className="detail-section">
+                  <h4>purpose</h4>
+                  <p>{ingredientData.purpose}</p>
+                </div>
+
+                <div className="detail-section">
+                  <h4>commonly found in</h4>
+                  <p>{ingredientData.commonly_found_in}</p>
+                </div>
+
+                <div className="detail-section">
+                  <h4>origin</h4>
+                  <p>{ingredientData.natural_or_synthetic}</p>
+                </div>
+
+                <div className="detail-section">
+                  <h4>safety status</h4>
+                  <p>{ingredientData.safety_status}</p>
+                </div>
+                
+                <div className="detail-section">
+                  <h4>health concerns</h4>
+                  <p>{ingredientData.health_concerns}</p>
+                </div>
+
+                <div className="detail-section">
+                  <h4>recommended intake</h4>
+                  <p>{ingredientData.recommended_intake}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Login/Register Modal */}
+      <LoginRegisterModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={(token, email) => {
+          localStorage.setItem('token', token);
+          localStorage.setItem('username', email);
+          setShowLoginModal(false);
+          // Force a re-render to show the save options
+          setIsLoggedIn(true);
+        }}
+      />
     </div>
   );
 };
