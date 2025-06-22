@@ -4,6 +4,8 @@ import LoadingScreen from './LoadingScreen';
 import HealthResults from './HealthResults';
 import DonutScene from './DonutScene';
 import AuthModal from './AuthModal';
+import Sidebar from './Sidebar';
+import HamburgerMenu from './HamburgerMenu';
 import imageCompression from 'browser-image-compression';
 import './Landing.css';
 import { Link } from 'react-router-dom';
@@ -22,15 +24,7 @@ const Landing = () => {
   const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
   const toggleMenu = () => {
-    if (!isMenuOpen) {
-      // Opening menu
-      setIsMenuOpen(true);
-      setTimeout(() => setOverlayVisible(true), 10); // Small delay for smooth transition
-    } else {
-      // Closing menu
-      setOverlayVisible(false);
-      setTimeout(() => setIsMenuOpen(false), 300); // Wait for transition to complete
-    }
+    setIsMenuOpen(!isMenuOpen);
   };
 
   const handleCameraClick = () => {
@@ -209,39 +203,12 @@ const Landing = () => {
       />
 
       {/* Hamburger Menu Button */}
-      <button className={`hamburger-menu ${isMenuOpen ? 'menu-open' : ''}`} onClick={toggleMenu}>
-        <div className="hamburger-line"></div>
-        <div className="hamburger-line"></div>
-        <div className="hamburger-line"></div>
-      </button>
+      <HamburgerMenu isOpen={isMenuOpen} onClick={toggleMenu} />
 
       {renderCurrentView()}
 
-      {/* Slide-in Menu */}
-      <div className={`slide-menu ${isMenuOpen ? 'open' : ''}`}>
-        <div className="menu-content">
-          <nav className="menu-nav">
-            <ul>
-              <li><Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link></li>
-              <li><Link to="/history" onClick={() => setIsMenuOpen(false)}>History</Link></li>
-              <li><Link to="/auth" onClick={() => setIsMenuOpen(false)}>Dashboard</Link></li>
-              <li><a href="#user">User</a></li>
-              <li><a href="#settings">Settings</a></li>
-              <li><a href="#feature1">Feature 1</a></li>
-              <li><a href="#feature2">Feature 2</a></li>
-              <li><a href="#feature3">Feature 3</a></li>
-            </ul>
-          </nav>
-        </div>
-      </div>
-
-      {/* Overlay */}
-      {isMenuOpen && (
-        <div 
-          className={`menu-overlay ${overlayVisible ? 'visible' : ''}`} 
-          onClick={toggleMenu}
-        ></div>
-      )}
+      {/* Sidebar */}
+      <Sidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
       {/* Auth Modal */}
       {showAuthModal && (

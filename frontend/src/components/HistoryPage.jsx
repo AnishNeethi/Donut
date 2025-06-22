@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import DonutScene from './DonutScene';
 import HistoryItem from './HistoryItem';
+import Sidebar from './Sidebar';
+import HamburgerMenu from './HamburgerMenu';
 import './HistoryPage.css';
 
 const HistoryPage = () => {
@@ -9,6 +11,7 @@ const HistoryPage = () => {
   const [message, setMessage] = useState('');
   const [filter, setFilter] = useState('avoided'); // 'eaten' or 'avoided'
   const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
@@ -71,6 +74,9 @@ const HistoryPage = () => {
 
   return (
     <div className="history-page">
+      {/* Hamburger Menu Button */}
+      <HamburgerMenu isOpen={isMenuOpen} onClick={() => setIsMenuOpen(!isMenuOpen)} />
+
       <div className="history-header">
         <h1>history</h1>
       </div>
@@ -113,6 +119,9 @@ const HistoryPage = () => {
           ))}
         </div>
       </div>
+
+      {/* Sidebar */}
+      <Sidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </div>
   );
 };

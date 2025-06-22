@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import imageCompression from 'browser-image-compression';
+import Sidebar from './Sidebar';
+import HamburgerMenu from './HamburgerMenu';
 
 const AuthPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,6 +21,7 @@ const AuthPage = () => {
   const [ingredientError, setIngredientError] = useState(null);
   const [timePeriod, setTimePeriod] = useState('7d'); // New state for time filter
   const [stats, setStats] = useState({ consumed: { calories: 0, sugar: 0 }, saved: { calories: 0, sugar: 0 } }); // New state for stats
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
@@ -435,6 +438,9 @@ const AuthPage = () => {
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+      {/* Hamburger Menu Button */}
+      <HamburgerMenu isOpen={isMenuOpen} onClick={() => setIsMenuOpen(!isMenuOpen)} />
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2>Image Analysis Dashboard</h2>
         <button onClick={handleLogout} style={{ padding: '5px 10px' }}>
@@ -557,6 +563,9 @@ const AuthPage = () => {
           {message}
         </div>
       )}
+
+      {/* Sidebar */}
+      <Sidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
       {/* Ingredient Popup */}
       {isIngredientPopupOpen && (

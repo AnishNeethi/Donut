@@ -1,60 +1,23 @@
 .landing-container {
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 50%, #FFB6C1 100%);
+  background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 50%, #FFE4E1 100%);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
   overflow: hidden;
   margin: 0;
   padding: 0;
 }
 
-/* Hamburger Menu Button */
-.hamburger-menu {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 10px;
-  z-index: 1000;
-}
-
-.hamburger-menu:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.hamburger-line {
-  width: 25px;
-  height: 3px;
-  background-color: #000;
-  margin: 3px 0;
-  transition: 0.3s;
-  border-radius: 2px;
-}
-
-.hamburger-menu.menu-open .hamburger-line {
-  background-color: #FFB6C1;
-}
-
-.hamburger-menu:hover .hamburger-line {
-  background-color: #333;
-}
-
-/* Active state - pink color when menu is open */
-.hamburger-menu.active .hamburger-line {
-  background-color: #FFB6C1;
-}
-
-/* Main Content */
 .main-content {
+  text-align: center;
+  z-index: 1;
+  transition: all 0.5s ease;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -62,107 +25,48 @@
 }
 
 .app-title {
-  font-size: 5.5rem;
-  font-weight: normal;
-  color: #151515;
-  text-align: center;
-  margin: 0;
+  font-size: 5rem;
+  color: #000;
   font-family: Arial, sans-serif;
+  font-weight: normal;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Camera Button */
 .camera-button {
-  position: absolute;
+  position: fixed;
   bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
   width: 140px;
   height: 70px;
-  background-color: 151515;
+  background-color: rgba(0, 0, 0, 0.8);
   border: 3px solid #FFB6C1;
   border-radius: 35px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  color: #FFB6C1;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
 
 .camera-button:hover {
   background-color: #fff;
   border-color: #000;
-  transform: translateX(-50%) scale(1.1);
+  color: #000;
+  transform: translateX(-50%) scale(1.05);
 }
 
 .camera-button:hover svg {
-  color: #000;
+  transform: scale(1.1);
 }
 
 .camera-button svg {
   width: 36px;
   height: 36px;
-  color: #FFB6C1;
-}
-
-/* Slide-in Menu */
-.slide-menu {
-  position: fixed;
-  top: 0;
-  left: -300px;
-  width: 300px;
-  height: 100vh;
-  background-color: #151515;
-  transition: left 0.3s ease-in-out;
-  z-index: 999;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-}
-
-.slide-menu.open {
-  left: 0;
-}
-
-.menu-content {
-  padding: 80px 20px 20px;
-  height: 100%;
-}
-
-.menu-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.menu-nav li {
-  margin-bottom: 25px;
-}
-
-.menu-nav a {
-  color: #FFB6C1;
-  text-decoration: none;
-  font-size: 1.2rem;
-  font-weight: 500;
-  display: block;
-  padding: 12px 15px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.menu-nav a:hover {
-  background-color: rgba(255, 182, 193, 0.1);
-  color: #FFC0CB;
-  transform: translateX(5px);
-}
-
-/* Menu Overlay */
-.menu-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 998;
-  transition: opacity 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 /* Global styles to prevent scrolling */
@@ -303,16 +207,6 @@ body, html {
     font-size: 4.2rem;
   }
   
-  .slide-menu {
-    width: 250px;
-    left: -250px;
-  }
-  
-  .hamburger-menu {
-    top: 15px;
-    left: 15px;
-  }
-  
   .camera-button {
     bottom: 40px;
     width: 120px;
@@ -329,16 +223,6 @@ body, html {
 @media (max-width: 480px) {
   .app-title {
     font-size: 3.5rem;
-  }
-  
-  .slide-menu {
-    width: 200px;
-    left: -200px;
-  }
-  
-  .menu-nav a {
-    font-size: 1rem;
-    padding: 10px 12px;
   }
   
   .camera-button {
