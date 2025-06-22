@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './HealthResults.css';
+import LoginRegisterModal from './LoginRegisterModal';
 
 const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -8,6 +9,10 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
   const [ingredientData, setIngredientData] = useState(null);
   const [ingredientLoading, setIngredientLoading] = useState(false);
   const [ingredientError, setIngredientError] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [saveCompleted, setSaveCompleted] = useState(false);
   const isLoggedIn = localStorage.getItem('token') !== null;
 
   const API_BASE = 'https://donut-backend-o6ef.onrender.com';
@@ -59,46 +64,7 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
     setIngredientLoading(false);
   };
 
-  // Calculate health rating based on nutrition data
-  const calculateHealthRating = () => {
-    const sugar = parseInt(nutritionData.sugar) || 0;
-    const calories = parseInt(nutritionData.calories) || 0;
-    const protein = parseInt(nutritionData.protein) || 0;
-    const fiber = parseInt(nutritionData.fiber) || 0;
 
-    let score = 100;
-    
-    // Deduct points for high sugar and calories
-    if (sugar > 20) score -= 30;
-    else if (sugar > 10) score -= 15;
-    
-    if (calories > 300) score -= 20;
-    else if (calories > 150) score -= 10;
-    
-    // Add points for protein and fiber
-    if (protein > 10) score += 10;
-    if (fiber > 5) score += 10;
-
-    return Math.max(0, Math.min(100, score));
-  };
-
-  const getHealthConcerns = () => {
-    const concerns = [];
-    const sugar = parseInt(nutritionData.sugar) || 0;
-    const calories = parseInt(nutritionData.calories) || 0;
-    const sodium = parseInt(nutritionData.sodium) || 0;
-    const fat = parseInt(nutritionData.total_fat) || 0;
-
-    if (sugar > 15) concerns.push('high sugar content');
-    if (calories > 250) concerns.push('high calorie count');
-    if (sodium > 500) concerns.push('high sodium');
-    if (fat > 15) concerns.push('high fat content');
-    
-    return concerns.length > 0 ? concerns : ['no major health concerns'];
-  };
-
-  const healthRating = calculateHealthRating();
-  const healthConcerns = getHealthConcerns();
 
   const categories = [
     {
@@ -106,18 +72,6 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
       title: 'nutrition facts',
       icon: '🍎',
       data: nutritionData
-    },
-    {
-      id: 'health-rating',
-      title: 'health rating',
-      icon: '⭐',
-      data: { rating: healthRating, description: healthRating > 70 ? 'good' : healthRating > 40 ? 'moderate' : 'poor' }
-    },
-    {
-      id: 'health-concerns',
-      title: 'health concerns',
-      icon: '⚠️',
-      data: healthConcerns
     },
     {
       id: 'ingredients',
@@ -136,28 +90,6 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
               <div key={key} className="nutrition-item">
                 <span className="nutrition-label">{key.replace(/_/g, ' ').toUpperCase()}</span>
                 <span className="nutrition-value">{value}</span>
-              </div>
-            ))}
-          </div>
-        );
-      
-      case 'health-rating':
-        return (
-          <div className="health-rating">
-            <div className="rating-circle">
-              <span className="rating-number">{category.data.rating}</span>
-              <span className="rating-max">/100</span>
-            </div>
-            <p className="rating-description">{category.data.description}</p>
-          </div>
-        );
-      
-      case 'health-concerns':
-        return (
-          <div className="concerns-list">
-            {category.data.map((concern, index) => (
-              <div key={index} className="concern-item">
-                {concern}
               </div>
             ))}
           </div>
@@ -184,11 +116,7 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
   };
 
   const handleSave = async (consumed) => {
-    if (!isLoggedIn) {
-      onSaveData(); // This will trigger the auth modal
-      return;
-    }
-
+    setLoading(true);
     try {
       const response = await fetch(`${API_BASE}/save-analysis`, {
         method: 'POST',
@@ -204,14 +132,17 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
       });
 
       if (response.ok) {
-        // After successful save, go back to home
-        onBackToHome();
+        setMessage('Successfully saved to history!');
+        setSaveCompleted(true);
       } else {
         console.error('Failed to save analysis');
+        setMessage('Failed to save to history');
       }
     } catch (error) {
       console.error('Error saving analysis:', error);
+      setMessage('Error saving to history');
     }
+    setLoading(false);
   };
 
   return (
@@ -246,20 +177,37 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
           <>
             <p className="save-prompt">what would you like to do with this analysis?</p>
             <div className="save-buttons">
-              <button className="save-btn eaten" onClick={() => handleSave(true)}>
-                save to eaten
+              <button 
+                className="save-btn eaten" 
+                onClick={() => handleSave(true)} 
+                disabled={loading || saveCompleted}
+              >
+                {loading ? 'saving...' : 'save to eaten'}
               </button>
-              <button className="save-btn avoided" onClick={() => handleSave(false)}>
-                save to avoided
+              <button 
+                className="save-btn avoided" 
+                onClick={() => handleSave(false)} 
+                disabled={loading || saveCompleted}
+              >
+                {loading ? 'saving...' : 'save to avoided'}
               </button>
-              <button className="save-btn dont-save" onClick={onBackToHome}>
+              <button 
+                className="save-btn dont-save" 
+                onClick={onBackToHome}
+                disabled={loading || saveCompleted}
+              >
                 don't save to history
               </button>
             </div>
+            {message && (
+              <div className={`save-message ${message.includes('Successfully') ? 'success' : 'error'}`}>
+                {message}
+              </div>
+            )}
           </>
         ) : (
           <div className="save-buttons">
-            <button className="save-btn" onClick={() => onSaveData()}>
+            <button className="save-btn" onClick={() => setShowLoginModal(true)}>
               Login to Save History
             </button>
           </div>
@@ -322,6 +270,19 @@ const HealthResults = ({ analysisData, onSaveData, onBackToHome }) => {
           </div>
         </div>
       )}
+
+      {/* Login/Register Modal */}
+      <LoginRegisterModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={(token, email) => {
+          localStorage.setItem('token', token);
+          localStorage.setItem('username', email);
+          setShowLoginModal(false);
+          // Force a re-render to show the save options
+          setIsLoggedIn(true);
+        }}
+      />
     </div>
   );
 };
