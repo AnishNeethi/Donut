@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Sidebar.css';
 
-const Sidebar = ({ isOpen, onClose, menuItems = [] }) => {
+const Sidebar = ({ isOpen, onClose, menuItems = [], onHomeClick }) => {
   const [overlayVisible, setOverlayVisible] = useState(false);
+  const navigate = useNavigate();
 
   // Default menu items if none provided
   const defaultMenuItems = [
-    { path: '/', label: 'home' },
+    { path: '/', label: 'home', isHome: true },
     { path: '/history', label: 'history' },
   ];
 
@@ -18,6 +19,17 @@ const Sidebar = ({ isOpen, onClose, menuItems = [] }) => {
     setTimeout(() => {
       onClose();
     }, 300);
+  };
+
+  const handleHomeClick = (e) => {
+    e.preventDefault();
+    // Call the custom home handler if provided (for Landing page)
+    if (onHomeClick) {
+      onHomeClick();
+    }
+    // Also navigate to home route (for other pages)
+    navigate('/');
+    handleMenuClick();
   };
 
   const handleOverlayClick = () => {
@@ -45,7 +57,11 @@ const Sidebar = ({ isOpen, onClose, menuItems = [] }) => {
             <ul className="main-menu">
               {items.map((item, index) => (
                 <li key={index}>
-                  {item.external ? (
+                  {item.isHome ? (
+                    <a href={item.path} onClick={handleHomeClick}>
+                      {item.label}
+                    </a>
+                  ) : item.external ? (
                     <a href={item.path} onClick={handleMenuClick}>
                       {item.label}
                     </a>

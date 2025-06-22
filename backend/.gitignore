@@ -1,3 +1,7 @@
+# Ignore Google Cloud SDK files
+google-cloud-sdk/
+google-cloud-cli-483.0.0-darwin-arm.tar.gz
+
 venv/
 
 # Byte-compiled / optimized / DLL files

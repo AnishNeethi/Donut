@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import CameraUpload from './CameraUpload';
 import LoadingScreen from './LoadingScreen';
 import HealthResults from './HealthResults';
@@ -11,6 +12,7 @@ import './Landing.css';
 import { Link } from 'react-router-dom';
 
 const Landing = () => {
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentView, setCurrentView] = useState('landing'); // landing, upload, loading, results, donut-scene
   const [analysisData, setAnalysisData] = useState(null);
@@ -24,6 +26,30 @@ const Landing = () => {
   const [titleFadeOut, setTitleFadeOut] = useState(false);
 
   const API_BASE = 'https://donut-backend-o6ef.onrender.com';
+
+  // Reset component state when navigating to home route
+  useEffect(() => {
+    if (location.pathname === '/') {
+      resetToHomeState();
+    }
+  }, [location.pathname]);
+
+  const resetToHomeState = () => {
+    setCurrentView('landing');
+    setTitleVisible(true);
+    setAnalysisData(null);
+    setSelectedFile(null);
+    setMessage('');
+    setButtonSlideOut(false);
+    setTitleFadeOut(false);
+    setLoading(false);
+    setShowAuthModal(false);
+    // Clear the file input to allow selecting the same file again
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -102,16 +128,7 @@ const Landing = () => {
 
   const handleUploadError = (error) => {
     console.error('Upload error:', error);
-    setCurrentView('landing'); // Go back to landing on error
-    setLoading(false);
-    setButtonSlideOut(false);
-    setTitleVisible(true);
-    setTitleFadeOut(false);
-    // Clear the file input
-    const fileInput = document.getElementById('fileInput');
-    if (fileInput) {
-      fileInput.value = '';
-    }
+    resetToHomeState();
   };
 
   const handleSaveData = () => {
@@ -126,19 +143,7 @@ const Landing = () => {
   };
 
   const handleBackToHome = () => {
-    setCurrentView('landing');
-    setTitleVisible(true);
-    setAnalysisData(null);
-    setSelectedFile(null);
-    setMessage('');
-    setButtonSlideOut(false);
-    setTitleFadeOut(false);
-    setLoading(false);
-    // Clear the file input to allow selecting the same file again
-    const fileInput = document.getElementById('fileInput');
-    if (fileInput) {
-      fileInput.value = '';
-    }
+    resetToHomeState();
   };
 
   const handleAnalyzeAnother = async (file) => {
@@ -266,7 +271,7 @@ const Landing = () => {
                       }
                     }}
                   >
-                    📊 view detailed results
+                    view detailed results
                   </button>
                 </div>
               </div>
@@ -290,7 +295,10 @@ const Landing = () => {
           <>
             {/* Main Content */}
             <div className={`main-content ${!titleVisible ? 'title-fade-out' : ''}`}>
-              <h1 className="app-title">donut</h1>
+              <div className="title-container">
+                <h1 className="app-title">donut</h1>
+                <p className="app-subtitle">more than meets the label</p>
+              </div>
             </div>
 
             {/* Camera Button */}
@@ -329,7 +337,11 @@ const Landing = () => {
       {renderCurrentView()}
 
       {/* Sidebar */}
-      <Sidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <Sidebar 
+        isOpen={isMenuOpen} 
+        onClose={() => setIsMenuOpen(false)}
+        onHomeClick={resetToHomeState}
+      />
 
       {/* Auth Modal */}
       {showAuthModal && (

@@ -51,7 +51,11 @@ const ProfilePage = () => {
   return (
     <div className="profile-page">
       <HamburgerMenu isOpen={isMenuOpen} onClick={toggleMenu} />
-      <Sidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <Sidebar 
+        isOpen={isMenuOpen} 
+        onClose={() => setIsMenuOpen(false)}
+        onHomeClick={() => {}} // Empty function since this page doesn't need custom home handling
+      />
       
       <div className="profile-content">
         {isAuthenticated ? (
