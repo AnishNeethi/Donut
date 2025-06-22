@@ -5,11 +5,42 @@ from google import genai
 from PIL import Image
 import io
 import logging
+import random
+from gtts import gTTS
 
 logger = logging.getLogger("gemini_utils")
 
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+# Array of concerned expressions for low health ratings
+CONCERNED_EXPRESSIONS = [
+    "yikes",
+    "ruh-roh", 
+    "uh-oh",
+    "hmm",
+    "interesting...",
+    "well then",
+    "oh?",
+    "okay...",
+    "alrighty",
+    "so that happened",
+    "huh",
+    "curious",
+    "that's something",
+    "well, okay",
+    "noted",
+    "oh, I see",
+    "that's one way to go",
+    "got it",
+    "huh, okay",
+    "well, that's different",
+    "if you say so",
+    "alright then",
+    "oh boy",
+    "oh man",
+    "whoops"
+]
 
 def analyze_image(image_bytes: bytes):
     """
@@ -145,3 +176,55 @@ def clean_response(response_text):
         response_text = response_text[:-3]
 
     return response_text.strip()
+
+def get_pronunciation_audio(ingredient_name: str, is_concerned: bool = False):
+    """
+    Generate pronunciation audio for an ingredient using text-to-speech.
+    
+    Args:
+        ingredient_name: The name of the ingredient to pronounce
+        is_concerned: If True, adds a concerned expression after pronunciation
+    
+    Returns:
+        Audio bytes in MP3 format
+    """
+    try:
+        # Get pronunciation from Gemini
+        pronunciation_prompt = f"""
+        Provide ONLY the phonetic pronunciation for the ingredient "{ingredient_name}".
+        Use simple, clear phonetics that are easy to read aloud.
+        Examples:
+        - "Sodium Benzoate" -> "SO-dee-um BEN-zoh-ate"
+        - "Monosodium Glutamate" -> "MON-oh-SO-dee-um GLOO-tuh-mate"
+        - "Aspartame" -> "AS-par-tame"
+        
+        Return ONLY the pronunciation, no additional text or formatting.
+        """
+        
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite-preview-06-17",
+            contents=[pronunciation_prompt]
+        )
+        
+        pronunciation = clean_response(response.text).strip()
+        
+        # Construct the text to speak
+        if is_concerned:
+            concerned_expression = random.choice(CONCERNED_EXPRESSIONS)
+            text_to_speak = f"{pronunciation}. {concerned_expression}"
+        else:
+            text_to_speak = pronunciation
+        
+        # Generate audio using gTTS
+        tts = gTTS(text=text_to_speak, lang='en', slow=False)
+        
+        # Save to bytes buffer
+        audio_buffer = io.BytesIO()
+        tts.write_to_fp(audio_buffer)
+        audio_buffer.seek(0)
+        
+        return audio_buffer.getvalue()
+        
+    except Exception as e:
+        logger.error(f"[ERROR] Failed to generate pronunciation audio: {e}")
+        raise e

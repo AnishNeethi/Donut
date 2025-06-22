@@ -1,11 +1,11 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Body, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 from db import uploads_collection
 from auth import decode_access_token
-from gemini_utils import analyze_image, analyze_ingredient
+from gemini_utils import analyze_image, analyze_ingredient, get_pronunciation_audio
 import os
 import tempfile
 from datetime import datetime, timedelta
@@ -20,6 +20,10 @@ class SaveAnalysisRequest(BaseModel):
     filename: str
     analysis: Dict[str, Any]
     consumed: bool
+
+class PronounceIngredientRequest(BaseModel):
+    ingredient_name: str
+    health_rating: Optional[int] = None
 
 @router.post("/upload")
 async def upload_image(
@@ -112,5 +116,33 @@ async def analyze_ingredient_endpoint(
         analysis_result = analyze_ingredient(request.ingredient_name)
         
         return analysis_result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/pronounce-ingredient")
+async def pronounce_ingredient_endpoint(
+    request: PronounceIngredientRequest,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    try:
+        # Extract token and decode user email
+        token = credentials.credentials
+        current_user = decode_access_token(token)
+        if not current_user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        # Determine if we should use concerned voice (health rating below 30)
+        is_concerned = request.health_rating is not None and request.health_rating < 30
+        
+        # Generate pronunciation audio
+        audio_bytes = get_pronunciation_audio(request.ingredient_name, is_concerned)
+        
+        # Return audio as MP3
+        return Response(
+            content=audio_bytes,
+            media_type="audio/mpeg",
+            headers={"Content-Disposition": f"attachment; filename=pronunciation.mp3"}
+        )
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
