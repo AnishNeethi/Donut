@@ -216,7 +216,7 @@ const Landing = () => {
                       }
                     }}
                   >
-                    📊 view detailed results
+                    view detailed results
                   </button>
                 </div>
               </div>
