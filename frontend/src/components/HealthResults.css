@@ -2,6 +2,14 @@
   padding: 20px;
   max-width: 600px;
   margin: 0 auto;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.health-results::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }
 
 .food-title {
@@ -182,6 +190,13 @@
   border-radius: 15px;
   color: rgba(0, 0, 0, 0.8);
   font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ingredient-item:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #FFB6C1;
 }
 
 /* Save Section */
@@ -279,5 +294,156 @@
   
   .rating-number {
     font-size: 1.5rem;
+  }
+}
+
+/* Ingredient Popup Styles */
+.ingredient-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.ingredient-popup {
+  background-color: #FFB6C1;
+  border-radius: 20px;
+  padding: 25px;
+  max-width: 90%;
+  width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ingredient-popup::-webkit-scrollbar {
+  display: none;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.ingredient-popup h3 {
+  font-size: 1.8rem;
+  color: rgba(0, 0, 0, 0.8);
+  margin: 0 0 20px 0;
+  padding-right: 40px;
+}
+
+.loading-message, .error-message {
+  text-align: center;
+  padding: 20px;
+  font-size: 1.1rem;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.error-message {
+  text-align: center;
+  padding: 20px;
+  color: #ff4444;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.error-message p {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.retry-btn {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #FFB6C1;
+  border: 2px solid #FFB6C1;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  background-color: #FFB6C1;
+  color: rgba(0, 0, 0, 0.8);
+  border-color: rgba(0, 0, 0, 0.8);
+}
+
+.ingredient-details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail-section {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.detail-section h4 {
+  font-size: 1.1rem;
+  color: rgba(0, 0, 0, 0.8);
+  margin: 0 0 8px 0;
+  font-weight: normal;
+}
+
+.detail-section p {
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.8);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Mobile Responsiveness for Popup */
+@media (max-width: 768px) {
+  .ingredient-popup {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .ingredient-popup h3 {
+    font-size: 1.5rem;
+  }
+
+  .detail-section {
+    padding: 12px;
+  }
+
+  .detail-section h4 {
+    font-size: 1rem;
+  }
+
+  .detail-section p {
+    font-size: 0.9rem;
   }
 } 
