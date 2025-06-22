@@ -4,7 +4,6 @@ import LoadingScreen from './LoadingScreen';
 import HealthResults from './HealthResults';
 import DonutScene from './DonutScene';
 import AuthModal from './AuthModal';
-import LoginRegisterModal from './LoginRegisterModal';
 import Sidebar from './Sidebar';
 import HamburgerMenu from './HamburgerMenu';
 import imageCompression from 'browser-image-compression';
@@ -16,7 +15,6 @@ const Landing = () => {
   const [currentView, setCurrentView] = useState('landing'); // landing, upload, loading, results, donut-scene
   const [analysisData, setAnalysisData] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [titleVisible, setTitleVisible] = useState(true);
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -24,8 +22,6 @@ const Landing = () => {
   const [message, setMessage] = useState('');
   const [buttonSlideOut, setButtonSlideOut] = useState(false);
   const [titleFadeOut, setTitleFadeOut] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
-  const [hasSaved, setHasSaved] = useState(false);
 
   const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
@@ -109,46 +105,8 @@ const Landing = () => {
     setCurrentView('landing'); // Go back to landing on error
   };
 
-  const handleSaveToHistory = async (consumed) => {
-    if (!isLoggedIn) {
-      setShowLoginModal(true);
-      return;
-    }
-    
-    setLoading(true);
-    setMessage('Saving to history...');
-
-    try {
-      const response = await fetch(`${API_BASE}/save-analysis`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          filename: selectedFile?.name || 'food-analysis.jpg',
-          analysis: analysisData,
-          consumed: consumed,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('Successfully saved to history!');
-        setHasSaved(true);
-      } else {
-        setMessage(data.detail || 'Failed to save to history.');
-      }
-    } catch (error) {
-      setMessage('An error occurred while saving.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDontSave = () => {
-    setHasSaved(true);
+  const handleSaveData = () => {
+    setShowAuthModal(true);
   };
 
   const handleViewDonutScene = () => {
@@ -201,7 +159,7 @@ const Landing = () => {
           <div className="results-container">
             <HealthResults
               analysisData={analysisData}
-              onSaveData={handleSaveToHistory}
+              onSaveData={handleSaveData}
             />
             <div className="results-actions">
               <button className="action-btn" onClick={handleViewDonutScene}>
@@ -220,7 +178,7 @@ const Landing = () => {
              <DonutScene sugarCount={getSugarAmount()} />
              <div className="donut-overlay-info">
                <div className="sugar-info-floating">
-                 <h3>Sugar: {getSugarAmount()}g</h3>
+                 <h3>sugar: {getSugarAmount()}g</h3>
                  <p>{Math.ceil(getSugarAmount() / 5)} donuts falling!</p>
                </div>
              </div>
@@ -229,13 +187,13 @@ const Landing = () => {
              <div className="floating-action-panel">
                <div className="action-panel-content">
                  <button className="panel-btn primary" onClick={handleSaveData}>
-                   💾 Save Analysis
+                   💾 save analysis
                  </button>
                  <button className="panel-btn secondary" onClick={handleBackToHome}>
-                   📷 Analyze Another Food
+                   📷 analyze another food
                  </button>
                  <button className="panel-btn tertiary" onClick={() => setCurrentView('results')}>
-                   📊 View Detailed Results
+                   📊 view detailed results
                  </button>
                </div>
              </div>
@@ -264,146 +222,30 @@ const Landing = () => {
 
   return (
     <div className="landing-container">
-      {/* Persistent Hamburger Menu */}
-      <HamburgerMenu isOpen={isMenuOpen} toggleMenu={toggleMenu} />
-      <Sidebar isOpen={isMenuOpen} onClose={toggleMenu} />
-
       {/* Hidden file input */}
       <input 
         type="file" 
         id="fileInput" 
         accept="image/*" 
+        style={{ display: 'none' }} 
         onChange={handleFileSelect}
-        style={{ display: 'none' }}
       />
 
-      {/* Main Content */}
+      {/* Hamburger Menu Button */}
+      <HamburgerMenu isOpen={isMenuOpen} onClick={toggleMenu} />
+
       {renderCurrentView()}
 
-      {/* Floating Action Panel */}
-      <div className="floating-action-panel" style={{
-        position: 'fixed',
-        bottom: 20,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1001,
-        width: '100%',
-        maxWidth: '1200px',
-        padding: '0 20px',
-        display: analysisData ? 'block' : 'none'
-      }}>
-        <div className="action-panel-content">
-          <div style={{
-            display: 'flex',
-            gap: '10px',
-            justifyContent: 'center',
-            width: '100%'
-          }}>
-            {isLoggedIn ? (
-              <>
-                <button 
-                  className="panel-btn"
-                  onClick={() => handleSaveToHistory(true)}
-                  disabled={loading || hasSaved}
-                  style={{
-                    backgroundColor: '#000000',
-                    opacity: hasSaved ? 0.5 : 1,
-                    cursor: hasSaved ? 'not-allowed' : 'pointer',
-                    padding: '10px 20px',
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  Save Consumed
-                </button>
-                <button 
-                  className="panel-btn"
-                  onClick={() => handleSaveToHistory(false)}
-                  disabled={loading || hasSaved}
-                  style={{
-                    backgroundColor: '#000000',
-                    opacity: hasSaved ? 0.5 : 1,
-                    cursor: hasSaved ? 'not-allowed' : 'pointer',
-                    padding: '10px 20px',
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  Save Not Consumed
-                </button>
-                <button 
-                  className="panel-btn"
-                  onClick={handleDontSave}
-                  disabled={hasSaved}
-                  style={{
-                    backgroundColor: '#000000',
-                    opacity: hasSaved ? 0.5 : 1,
-                    cursor: hasSaved ? 'not-allowed' : 'pointer',
-                    padding: '10px 20px',
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  Don't Save to History
-                </button>
-              </>
-            ) : (
-              <button 
-                className="panel-btn"
-                onClick={() => setShowLoginModal(true)}
-                style={{
-                  backgroundColor: '#000000',
-                  opacity: 1,
-                  cursor: 'pointer',
-                  padding: '10px 20px',
-                  textAlign: 'center',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                Login to Save History
-              </button>
-            )}
-            <button 
-              className="panel-btn"
-              onClick={handleBackToHome}
-              style={{
-                backgroundColor: '#000000',
-                opacity: 1,
-                cursor: 'pointer',
-                padding: '10px 20px',
-                textAlign: 'center',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              Scan Another
-            </button>
-            <button 
-              className="panel-btn"
-              onClick={() => setCurrentView('results')}
-              style={{
-                backgroundColor: '#000000',
-                opacity: 1,
-                cursor: 'pointer',
-                padding: '10px 20px',
-                textAlign: 'center',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              View Detailed Stats
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Sidebar */}
+      <Sidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
-      {/* Login/Register Modal */}
-      <LoginRegisterModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLoginSuccess={() => {
-          setIsLoggedIn(true);
-          setShowLoginModal(false);
-        }}
-      />
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          analysisData={analysisData}
+        />
+      )}
     </div>
   );
 };
