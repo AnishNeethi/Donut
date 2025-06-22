@@ -6,6 +6,8 @@ const PronunciationPlayer = ({ ingredientName, healthRating }) => {
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef(null);
 
+  const API_BASE = 'http://127.0.0.1:8000';
+
   const getPronunciation = async () => {
     if (isLoading) return;
     setIsLoading(true);
@@ -17,7 +19,7 @@ const PronunciationPlayer = ({ ingredientName, healthRating }) => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('/api/pronounce-ingredient', {
+      const response = await fetch(`${API_BASE}/pronounce-ingredient`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +70,6 @@ const PronunciationPlayer = ({ ingredientName, healthRating }) => {
     <div className="pronunciation-player">
       <div className="ingredient-info">
         <span className="ingredient-name">{ingredientName}</span>
-        <span className="health-rating">Health Rating: {healthRating}</span>
       </div>
       <button 
         className={`play-button ${isLoading ? 'loading' : ''} ${isPlaying ? 'playing' : ''}`} 

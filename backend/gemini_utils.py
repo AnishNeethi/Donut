@@ -6,12 +6,18 @@ from PIL import Image
 import io
 import logging
 import random
-from gtts import gTTS
+from google.cloud import texttospeech
+
+# Load environment variables
+load_dotenv()
+
+# Initialize clients with credentials
+# Gemini client
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+# Google Cloud TTS client, which will automatically find the application default credentials
+tts_client = texttospeech.TextToSpeechClient()
 
 logger = logging.getLogger("gemini_utils")
-
-load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Array of concerned expressions for low health ratings
 CONCERNED_EXPRESSIONS = [
@@ -179,51 +185,55 @@ def clean_response(response_text):
 
 def get_pronunciation_audio(ingredient_name: str, is_concerned: bool = False):
     """
-    Generate pronunciation audio for an ingredient using text-to-speech.
+    Generate pronunciation audio for an ingredient using Google Cloud Text-to-Speech.
     
     Args:
         ingredient_name: The name of the ingredient to pronounce
-        is_concerned: If True, adds a concerned expression after pronunciation
+        is_concerned: If True, adds a concerned expression and modifies voice prosody
     
     Returns:
         Audio bytes in MP3 format
     """
     try:
-        # Get pronunciation from Gemini
-        pronunciation_prompt = f"""
-        Provide ONLY the phonetic pronunciation for the ingredient "{ingredient_name}".
-        Use simple, clear phonetics that are easy to read aloud.
-        Examples:
-        - "Sodium Benzoate" -> "SO-dee-um BEN-zoh-ate"
-        - "Monosodium Glutamate" -> "MON-oh-SO-dee-um GLOO-tuh-mate"
-        - "Aspartame" -> "AS-par-tame"
+        # Step 1: Construct the text to speak directly from the ingredient name.
+        # We no longer ask Gemini for phonetics, as the TTS engine is very capable.
+        text_to_speak = ingredient_name
+        if is_concerned:
+            # Add a random concerned expression for more variety
+            concerned_expression = random.choice(CONCERNED_EXPRESSIONS)
+            text_to_speak = f"{ingredient_name}. {concerned_expression}"
+
+        # Step 2: Generate audio using Google Cloud TTS for higher quality
+        # The tts_client is already initialized globally
         
-        Return ONLY the pronunciation, no additional text or formatting.
-        """
-        
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-lite-preview-06-17",
-            contents=[pronunciation_prompt]
+        # If concerned, wrap in SSML for prosody changes
+        if is_concerned:
+            # Studio voices do not support the 'pitch' attribute, but we can slow the rate.
+            ssml_text = f'<speak><prosody rate="slow">{text_to_speak}</prosody></speak>'
+            synthesis_input = texttospeech.SynthesisInput(ssml=ssml_text)
+        else:
+            synthesis_input = texttospeech.SynthesisInput(text=text_to_speak)
+
+        # Build the voice request, select the language code ("en-US") and the voice name
+        # Using a high-quality Studio voice
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="en-US", 
+            name="en-US-Studio-O"
+        )
+
+        # Select the type of audio file you want
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.MP3
+        )
+
+        # Perform the text-to-speech request
+        # The SDK will automatically use the project_id from the environment if available
+        # or from the gcloud config.
+        response = tts_client.synthesize_speech(
+            input=synthesis_input, voice=voice, audio_config=audio_config
         )
         
-        pronunciation = clean_response(response.text).strip()
-        
-        # Construct the text to speak
-        if is_concerned:
-            concerned_expression = random.choice(CONCERNED_EXPRESSIONS)
-            text_to_speak = f"{pronunciation}. {concerned_expression}"
-        else:
-            text_to_speak = pronunciation
-        
-        # Generate audio using gTTS
-        tts = gTTS(text=text_to_speak, lang='en', slow=False)
-        
-        # Save to bytes buffer
-        audio_buffer = io.BytesIO()
-        tts.write_to_fp(audio_buffer)
-        audio_buffer.seek(0)
-        
-        return audio_buffer.getvalue()
+        return response.audio_content
         
     except Exception as e:
         logger.error(f"[ERROR] Failed to generate pronunciation audio: {e}")

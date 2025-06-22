@@ -8,7 +8,7 @@ const AuthModal = ({ onClose, analysisData }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  const API_BASE = 'https://donut-backend-o6ef.onrender.com';
+  const API_BASE = 'http://127.0.0.1:8000';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
