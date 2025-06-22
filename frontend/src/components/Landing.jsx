@@ -194,11 +194,9 @@ const Landing = () => {
             {/* Donut falling section */}
             <div className="donut-falling-section">
               <DonutScene sugarCount={getSugarAmount()} />
-              <div className="donut-overlay-info">
-                <div className="sugar-info-floating">
-                  <h3>sugar: {getSugarAmount()}g</h3>
-                  <p>{Math.ceil(getSugarAmount() / 10)} donuts falling!</p>
-                </div>
+              <div className="food-title-header">
+                <h2 className="food-name">{analysisData?.food_name || 'unknown food'}</h2>
+                <p className="sugar-subtitle">{Math.ceil(getSugarAmount() / 10)} donuts worth of sugar</p>
               </div>
               
               {/* Floating Action Panel */}
