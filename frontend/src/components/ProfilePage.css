@@ -1,0 +1,138 @@
+.profile-page {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 50%, #FFE4E1 100%);
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.profile-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
+}
+
+.profile-content.sidebar-open {
+  margin-left: 250px;
+}
+
+.authenticated-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.authenticated-content h2 {
+  font-size: 3rem;
+  color: #000;
+  font-family: Arial, sans-serif;
+  font-weight: normal;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.username {
+  font-size: 1.5rem;
+  color: #000;
+  font-weight: normal;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.logout-button {
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 3px solid #FFB6C1;
+  border-radius: 25px;
+  color: #FFB6C1;
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: normal;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: Arial, sans-serif;
+}
+
+.logout-button:hover {
+  background-color: #fff;
+  border-color: #000;
+  color: #000;
+  transform: translateY(-2px);
+}
+
+.login-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.login-prompt h2 {
+  font-size: 3rem;
+  color: #000;
+  font-family: Arial, sans-serif;
+  font-weight: normal;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.login-prompt p {
+  font-size: 1.2rem;
+  color: #000;
+  margin: 0;
+  line-height: 1.6;
+  font-family: Arial, sans-serif;
+}
+
+.login-button {
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 3px solid #FFB6C1;
+  border-radius: 25px;
+  color: #FFB6C1;
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: normal;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: Arial, sans-serif;
+}
+
+.login-button:hover {
+  background-color: #fff;
+  border-color: #000;
+  color: #000;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .profile-content {
+    padding: 15px;
+  }
+  
+  .authenticated-content h2,
+  .login-prompt h2 {
+    font-size: 2.5rem;
+  }
+  
+  .username {
+    font-size: 1.3rem;
+  }
+} 

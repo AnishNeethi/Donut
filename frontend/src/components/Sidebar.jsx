@@ -9,12 +9,6 @@ const Sidebar = ({ isOpen, onClose, menuItems = [] }) => {
   const defaultMenuItems = [
     { path: '/', label: 'Home' },
     { path: '/history', label: 'History' },
-    { path: '/auth', label: 'Dashboard' },
-    { path: '#user', label: 'User', external: true },
-    { path: '#settings', label: 'Settings', external: true },
-    { path: '#feature1', label: 'Feature 1', external: true },
-    { path: '#feature2', label: 'Feature 2', external: true },
-    { path: '#feature3', label: 'Feature 3', external: true },
   ];
 
   const items = menuItems.length > 0 ? menuItems : defaultMenuItems;
@@ -48,7 +42,7 @@ const Sidebar = ({ isOpen, onClose, menuItems = [] }) => {
       <div className={`slide-menu ${isOpen ? 'open' : ''}`}>
         <div className="menu-content">
           <nav className="menu-nav">
-            <ul>
+            <ul className="main-menu">
               {items.map((item, index) => (
                 <li key={index}>
                   {item.external ? (
@@ -63,6 +57,13 @@ const Sidebar = ({ isOpen, onClose, menuItems = [] }) => {
                 </li>
               ))}
             </ul>
+            
+            {/* Profile section at bottom */}
+            <div className="profile-section">
+              <Link to="/profile" onClick={handleMenuClick} className="profile-link">
+                Profile
+              </Link>
+            </div>
           </nav>
         </div>
       </div>
