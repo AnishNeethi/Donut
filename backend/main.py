@@ -18,9 +18,22 @@ logging.getLogger("uvicorn.error").setLevel(logging.INFO)
 
 app = FastAPI()
 
+# Define allowed origins
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",  # Vite default port
+    "http://localhost:8080",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8080",
+    "https://donut-backend-o6ef.onrender.com",
+    "*"  # Allow all origins for development
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust for production!
+    allow_origins=allowed_origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

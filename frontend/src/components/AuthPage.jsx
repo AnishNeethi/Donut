@@ -31,25 +31,44 @@ const AuthPage = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setMessage(''); // Clear previous messages
     try {
+      const requestBody = { email, password };
+      console.log('Sending registration request:', { email, password: '***' });
+      
       const response = await fetch(`${API_BASE}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(requestBody),
       });
       
+      console.log('Registration response status:', response.status);
+      
       const data = await response.json();
+      console.log('Registration response data:', data);
       
       if (response.ok) {
         setMessage('Registration successful! Please login.');
         setCurrentView('login');
       } else {
-        setMessage(data.detail || 'Registration failed');
+        // Handle different types of error responses
+        let errorMessage = 'Registration failed';
+        if (data.detail) {
+          if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+          } else if (Array.isArray(data.detail)) {
+            errorMessage = data.detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ');
+          } else if (typeof data.detail === 'object') {
+            errorMessage = JSON.stringify(data.detail);
+          }
+        }
+        setMessage(`${errorMessage} (${response.status})`);
       }
     } catch (error) {
-      setMessage('Error during registration');
+      console.error('Registration error:', error);
+      setMessage(`Error during registration: ${error.message}`);
     }
     setLoading(false);
   };
@@ -75,10 +94,21 @@ const AuthPage = () => {
         setMessage('Login successful!');
         setCurrentView('upload');
       } else {
-        setMessage(data.detail || 'Login failed');
+        // Handle different types of error responses
+        let errorMessage = 'Login failed';
+        if (data.detail) {
+          if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+          } else if (Array.isArray(data.detail)) {
+            errorMessage = data.detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ');
+          } else if (typeof data.detail === 'object') {
+            errorMessage = JSON.stringify(data.detail);
+          }
+        }
+        setMessage(`${errorMessage} (${response.status})`);
       }
     } catch (error) {
-      setMessage('Error during login');
+      setMessage(`Error during login: ${error.message}`);
     }
     setLoading(false);
   };
