@@ -57,12 +57,7 @@ const DonutScene = ({ sugarCount = 0 }) => {
           ))}
         </Physics>
       </Canvas>
-      
-      {sugarCount > 0 && (
-        <div className="sugar-info">
-          <p>sugar: {sugarCount}g = {Math.ceil(sugarCount / 10)} donuts!</p>
-        </div>
-      )}
+    
     </div>
   )
 }

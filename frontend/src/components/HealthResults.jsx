@@ -3,12 +3,60 @@ import './HealthResults.css';
 
 const HealthResults = ({ analysisData, onSaveData }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedIngredient, setSelectedIngredient] = useState(null);
+  const [isIngredientPopupOpen, setIsIngredientPopupOpen] = useState(false);
+  const [ingredientData, setIngredientData] = useState(null);
+  const [ingredientLoading, setIngredientLoading] = useState(false);
+  const [ingredientError, setIngredientError] = useState(null);
+
+  const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
   if (!analysisData) return null;
 
   const nutritionData = analysisData.nutrition_data || {};
   const ingredients = analysisData.ingredients || [];
   const foodName = analysisData.food_name || 'Unknown Food';
+
+  const handleIngredientClick = (ingredient) => {
+    setSelectedIngredient(ingredient);
+    setIsIngredientPopupOpen(true);
+    fetchIngredientData(ingredient);
+  };
+
+  const closeIngredientPopup = () => {
+    setIsIngredientPopupOpen(false);
+    setSelectedIngredient(null);
+    setIngredientData(null);
+    setIngredientError(null);
+  };
+
+  const fetchIngredientData = async (ingredient) => {
+    setIngredientLoading(true);
+    setIngredientError(null);
+    
+    try {
+      const response = await fetch(`${API_BASE}/analyze-ingredient`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ ingredient_name: ingredient }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setIngredientData(data);
+      } else {
+        setIngredientError(data.detail || 'Failed to analyze ingredient');
+      }
+    } catch (error) {
+      setIngredientError('Error analyzing ingredient');
+    }
+    
+    setIngredientLoading(false);
+  };
 
   // Calculate health rating based on nutrition data
   const calculateHealthRating = () => {
@@ -118,7 +166,11 @@ const HealthResults = ({ analysisData, onSaveData }) => {
         return (
           <div className="ingredients-list">
             {category.data.map((ingredient, index) => (
-              <div key={index} className="ingredient-item">
+              <div 
+                key={index} 
+                className="ingredient-item"
+                onClick={() => handleIngredientClick(ingredient)}
+              >
                 {ingredient}
               </div>
             ))}
@@ -163,6 +215,63 @@ const HealthResults = ({ analysisData, onSaveData }) => {
           save to profile
         </button>
       </div>
+
+      {/* Ingredient Popup */}
+      {isIngredientPopupOpen && (
+        <div className="ingredient-popup-overlay" onClick={closeIngredientPopup}>
+          <div className="ingredient-popup" onClick={e => e.stopPropagation()}>
+            <button className="close-btn" onClick={closeIngredientPopup}>×</button>
+            <h3>{selectedIngredient}</h3>
+            
+            {ingredientLoading && (
+              <div className="loading-message">analyzing ingredient...</div>
+            )}
+            
+            {ingredientError && (
+              <div className="error-message">{ingredientError}</div>
+            )}
+            
+            {ingredientData && (
+              <div className="ingredient-details">
+                <div className="detail-section">
+                  <h4>pronunciation</h4>
+                  <p>{ingredientData.pronunciation}</p>
+                </div>
+                
+                <div className="detail-section">
+                  <h4>purpose</h4>
+                  <p>{ingredientData.purpose}</p>
+                </div>
+
+                <div className="detail-section">
+                  <h4>commonly found in</h4>
+                  <p>{ingredientData.commonly_found_in}</p>
+                </div>
+
+                <div className="detail-section">
+                  <h4>origin</h4>
+                  <p>{ingredientData.natural_or_synthetic}</p>
+                </div>
+
+                <div className="detail-section">
+                  <h4>safety status</h4>
+                  <p>{ingredientData.safety_status}</p>
+                </div>
+                
+                <div className="detail-section">
+                  <h4>health concerns</h4>
+                  <p>{ingredientData.health_concerns}</p>
+                </div>
+
+                <div className="detail-section">
+                  <h4>recommended intake</h4>
+                  <p>{ingredientData.recommended_intake}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

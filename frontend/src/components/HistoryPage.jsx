@@ -103,7 +103,6 @@ const HistoryPage = () => {
         </div>
         <DonutScene sugarCount={totalSugar} />
       </div>
-
       <div className="history-list-container">
         <h2 className="list-title">your {filter === 'eaten' ? 'eaten' : 'avoided'} items</h2>
         {loading && <p>loading history...</p>}
