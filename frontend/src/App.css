@@ -48,19 +48,20 @@
 }
 
 .donut-scene {
-  border: 2px solid #ddd;
-  border-radius: 10px;
-  margin: 20px auto;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #FFB6C1;
+  margin: 0;
+  border: none;
+  border-radius: 0;
 }
 
 .sugar-info {
   margin-top: 10px;
   padding: 10px;
-  background: #f0f0f0;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 5px;
   font-weight: bold;
-  color: #D2691E;
+  color: #000;
+  backdrop-filter: blur(10px);
 }
 
 .info {

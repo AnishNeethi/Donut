@@ -27,7 +27,7 @@ const DonutScene = ({ sugarCount = 0 }) => {
   }, [sugarCount])
 
   return (
-    <div className="donut-scene" style={{ width: '100%', height: '400px' }}>
+    <div className="donut-scene" style={{ width: '100%', height: '100vh' }}>
       <Canvas camera={{ position: [0, 5, 8], fov: 45 }}>
         {/* Lighting */}
         <ambientLight intensity={0.4} />

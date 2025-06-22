@@ -1,7 +1,7 @@
 .landing-container {
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 50%, #FFE4E1 100%);
+  background: #FFB6C1;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -69,6 +69,49 @@
   transition: transform 0.3s ease;
 }
 
+.camera-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.camera-button.disabled:hover {
+  transform: translateX(-50%) scale(1);
+  background-color: rgba(0, 0, 0, 0.8);
+  border-color: #FFB6C1;
+  color: #FFB6C1;
+}
+
+.camera-button.slide-out {
+  animation: slideOutBottom 0.5s ease-in-out forwards;
+}
+
+@keyframes slideOutBottom {
+  0% {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) translateY(150px);
+    opacity: 0;
+  }
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #FFB6C1;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
 /* Global styles to prevent scrolling */
 * {
   margin: 0;
@@ -96,6 +139,52 @@ body, html {
   100% {
     opacity: 0;
     transform: translateY(100vh);
+  }
+}
+
+/* Title Fade Out Animation */
+.title-fade-out {
+  animation: titleFadeOut 0.5s ease-in-out forwards;
+}
+
+@keyframes titleFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Title to Loading Transition */
+.title-to-loading {
+  animation: titleFadeIn 0.8s ease-in-out forwards;
+  font-size: 2.5rem !important;
+  text-align: center;
+  color: #000;
+  opacity: 0;
+}
+
+@keyframes titleFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Fade Out Animation */
+.fade-out {
+  animation: fadeOut 0.8s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
@@ -146,12 +235,143 @@ body, html {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Donut Scene Container */
-.donut-scene-container {
-  width: 100%;
+/* Donut Scene Fullscreen */
+.donut-scene-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100vh;
-  overflow-y: auto;
+  background: #FFB6C1;
+  z-index: 10;
+}
+
+.donut-overlay-info {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  z-index: 11;
+  pointer-events: none;
+}
+
+.back-btn-floating {
+  padding: 10px 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+  backdrop-filter: blur(10px);
+}
+
+.back-btn-floating:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: #000;
+  color: #000;
+}
+
+.sugar-info-floating {
+  text-align: right;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 15px 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.sugar-info-floating h3 {
+  font-size: 1.3rem;
+  color: #000;
+  font-family: Arial, sans-serif;
+  font-weight: normal;
+  margin: 0 0 5px 0;
+}
+
+.sugar-info-floating p {
+  font-size: 0.9rem;
+  color: #000;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Floating Action Panel */
+.floating-action-panel {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11;
+}
+
+.action-panel-content {
+  display: flex;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.15);
   padding: 20px;
+  border-radius: 25px;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.panel-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 20px;
+  font-family: Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.panel-btn.primary {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.panel-btn.primary:hover {
+  background: linear-gradient(135deg, #45a049, #3e8e41);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.panel-btn.secondary {
+  background: linear-gradient(135deg, #FF69B4, #FF1493);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+}
+
+.panel-btn.secondary:hover {
+  background: linear-gradient(135deg, #FF1493, #DC143C);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+}
+
+.panel-btn.tertiary {
+  background: rgba(255, 255, 255, 0.8);
+  color: #333;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.panel-btn.tertiary:hover {
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .scene-header {
@@ -218,6 +438,29 @@ body, html {
     width: 32px;
     height: 32px;
   }
+
+  .action-panel-content {
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+    max-width: 90vw;
+  }
+
+  .panel-btn {
+    padding: 10px 15px;
+    font-size: 0.8rem;
+    justify-content: center;
+  }
+
+  .donut-overlay-info {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .sugar-info-floating {
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -235,5 +478,14 @@ body, html {
   .camera-button svg {
     width: 28px;
     height: 28px;
+  }
+
+  .floating-action-panel {
+    bottom: 20px;
+  }
+
+  .panel-btn {
+    font-size: 0.7rem;
+    padding: 8px 12px;
   }
 } 

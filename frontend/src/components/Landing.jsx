@@ -20,6 +20,8 @@ const Landing = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [buttonSlideOut, setButtonSlideOut] = useState(false);
+  const [titleFadeOut, setTitleFadeOut] = useState(false);
 
   const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
@@ -36,7 +38,13 @@ const Landing = () => {
     if (file) {
       console.log('Selected file:', file);
       setSelectedFile(file);
-      handleUploadStart();
+      setButtonSlideOut(true);
+      setTitleVisible(false); // Start title fade out
+      
+      // Wait for button animation to complete before starting upload
+      setTimeout(() => {
+        handleUploadStart();
+      }, 500);
       
       // Use the same upload logic as AuthPage
       setLoading(true);
@@ -65,7 +73,6 @@ const Landing = () => {
         
         if (response.ok) {
           setAnalysisData(data);
-          setMessage('Analysis complete!');
           handleUploadComplete(data);
         } else {
           setMessage(data.error || 'Upload failed');
@@ -87,7 +94,10 @@ const Landing = () => {
 
   const handleUploadComplete = (data) => {
     setAnalysisData(data);
-    setCurrentView('results');
+    setTitleFadeOut(true);
+    setTimeout(() => {
+      setCurrentView('donut-scene');
+    }, 800); // Wait for fade out animation
   };
 
   const handleUploadError = (error) => {
@@ -112,6 +122,8 @@ const Landing = () => {
     setAnalysisData(null);
     setSelectedFile(null);
     setMessage('');
+    setButtonSlideOut(false);
+    setTitleFadeOut(false);
   };
 
   const getSugarAmount = () => {
@@ -131,7 +143,16 @@ const Landing = () => {
         );
       
       case 'loading':
-        return <LoadingScreen message={message || "Analyzing your food..."} />;
+        return (
+          <>
+            {/* Main Content - transition title to loading message */}
+            <div className="main-content">
+              <h1 className={`app-title title-to-loading ${titleFadeOut ? 'fade-out' : ''}`}>
+                {message || "Uploading compressed image..."}
+              </h1>
+            </div>
+          </>
+        );
       
       case 'results':
         return (
@@ -151,36 +172,44 @@ const Landing = () => {
           </div>
         );
       
-      case 'donut-scene':
-        return (
-          <div className="donut-scene-container">
-            <div className="scene-header">
-              <button className="back-btn" onClick={handleBackToHome}>
-                ← Back to Home
-              </button>
-              <div className="sugar-info">
-                <h3>Sugar Visualization: {getSugarAmount()}g</h3>
-                <p>{Math.ceil(getSugarAmount() / 5)} donuts falling!</p>
-              </div>
-            </div>
-            <DonutScene sugarCount={getSugarAmount()} />
-            <HealthResults
-              analysisData={analysisData}
-              onSaveData={handleSaveData}
-            />
-          </div>
-        );
+             case 'donut-scene':
+         return (
+           <div className="donut-scene-fullscreen">
+             <DonutScene sugarCount={getSugarAmount()} />
+             <div className="donut-overlay-info">
+               <div className="sugar-info-floating">
+                 <h3>Sugar: {getSugarAmount()}g</h3>
+                 <p>{Math.ceil(getSugarAmount() / 5)} donuts falling!</p>
+               </div>
+             </div>
+             
+             {/* Floating Action Panel */}
+             <div className="floating-action-panel">
+               <div className="action-panel-content">
+                 <button className="panel-btn primary" onClick={handleSaveData}>
+                   💾 Save Analysis
+                 </button>
+                 <button className="panel-btn secondary" onClick={handleBackToHome}>
+                   📷 Analyze Another Food
+                 </button>
+                 <button className="panel-btn tertiary" onClick={() => setCurrentView('results')}>
+                   📊 View Detailed Results
+                 </button>
+               </div>
+             </div>
+           </div>
+         );
       
       default:
         return (
           <>
             {/* Main Content */}
-            <div className={`main-content ${!titleVisible ? 'title-exit' : ''}`}>
+            <div className={`main-content ${!titleVisible ? 'title-fade-out' : ''}`}>
               <h1 className="app-title">donut</h1>
             </div>
 
             {/* Camera Button */}
-            <button className="camera-button" onClick={handleCameraClick}>
+            <button className={`camera-button ${buttonSlideOut ? 'slide-out' : ''}`} onClick={handleCameraClick}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                 <circle cx="12" cy="13" r="4"></circle>
