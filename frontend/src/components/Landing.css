@@ -26,7 +26,7 @@
 
 .app-title {
   font-size: 5rem;
-  color: #000;
+  color: rgba(0, 0, 0, 0.8);
   font-family: Arial, sans-serif;
   font-weight: normal;
   margin: 0;
@@ -54,8 +54,8 @@
 
 .camera-button:hover {
   background-color: #fff;
-  border-color: #000;
-  color: #000;
+  border-color: rgba(0, 0, 0, 0.8);
+  color: rgba(0, 0, 0, 0.8);
   transform: translateX(-50%) scale(1.05);
 }
 
@@ -161,7 +161,7 @@ body, html {
   animation: titleFadeIn 0.8s ease-in-out forwards;
   font-size: 2.5rem !important;
   text-align: center;
-  color: #000;
+  color: rgba(0, 0, 0, 0.8);
   opacity: 0;
 }
 
@@ -221,14 +221,14 @@ body, html {
 
 .action-btn:hover {
   background-color: #fff;
-  border-color: #000;
-  color: #000;
+  border-color: rgba(0, 0, 0, 0.8);
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .action-btn.secondary {
   background-color: transparent;
-  color: #000;
-  border-color: #000;
+  color: rgba(0, 0, 0, 0.8);
+  border-color: rgba(0, 0, 0, 0.8);
 }
 
 .action-btn.secondary:hover {
@@ -260,7 +260,7 @@ body, html {
 
 .back-btn-floating {
   padding: 10px 20px;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
   border: 2px solid rgba(255, 255, 255, 0.8);
   border-radius: 20px;
   color: #fff;
@@ -274,8 +274,8 @@ body, html {
 
 .back-btn-floating:hover {
   background-color: rgba(255, 255, 255, 0.9);
-  border-color: #000;
-  color: #000;
+  border-color: rgba(0, 0, 0, 0.8);
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .sugar-info-floating {
@@ -288,7 +288,7 @@ body, html {
 
 .sugar-info-floating h3 {
   font-size: 1.3rem;
-  color: #000;
+  color: rgba(0, 0, 0, 0.8);
   font-family: Arial, sans-serif;
   font-weight: normal;
   margin: 0 0 5px 0;
@@ -296,7 +296,7 @@ body, html {
 
 .sugar-info-floating p {
   font-size: 0.9rem;
-  color: #000;
+  color: rgba(0, 0, 0, 0.8);
   font-family: Arial, sans-serif;
   margin: 0;
   opacity: 0.8;
@@ -363,7 +363,7 @@ body, html {
 
 .panel-btn.tertiary {
   background: rgba(255, 255, 255, 0.8);
-  color: #333;
+  color: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
@@ -397,8 +397,8 @@ body, html {
 
 .back-btn:hover {
   background-color: #fff;
-  border-color: #000;
-  color: #000;
+  border-color: rgba(0, 0, 0, 0.8);
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .sugar-info {
@@ -407,7 +407,7 @@ body, html {
 
 .sugar-info h3 {
   font-size: 1.5rem;
-  color: #000;
+  color: rgba(0, 0, 0, 0.8);
   font-family: Arial, sans-serif;
   font-weight: normal;
   margin: 0 0 5px 0;
@@ -415,7 +415,7 @@ body, html {
 
 .sugar-info p {
   font-size: 1rem;
-  color: #000;
+  color: rgba(0, 0, 0, 0.8);
   font-family: Arial, sans-serif;
   margin: 0;
   opacity: 0.8;

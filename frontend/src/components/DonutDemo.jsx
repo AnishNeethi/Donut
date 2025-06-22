@@ -10,12 +10,12 @@ const DonutDemo = () => {
 
   return (
     <div className="donut-demo">
-      <h1>🍩 Donut Sugar Visualizer</h1>
-      <p>Adjust the sugar slider to see donuts fall!</p>
+      <h1>🍩 donut sugar visualizer</h1>
+      <p>adjust the sugar slider to see donuts fall!</p>
       
       <div className="controls">
         <label htmlFor="sugar-slider">
-          Sugar Amount: {sugarAmount}g
+          sugar amount: {sugarAmount}g
         </label>
         <input
           id="sugar-slider"
@@ -32,10 +32,10 @@ const DonutDemo = () => {
       
       <div className="info">
         <p>
-          <strong>How it works:</strong> Every 5g of sugar = 1 donut falling from the sky!
+          <strong>how it works:</strong> every 5g of sugar = 1 donut falling from the sky!
         </p>
         <p>
-          Try different values to see the physics simulation in action.
+          try different values to see the physics simulation in action.
         </p>
       </div>
     </div>

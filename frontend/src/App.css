@@ -60,7 +60,7 @@
   background: rgba(255, 255, 255, 0.2);
   border-radius: 5px;
   font-weight: bold;
-  color: #000;
+  color: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
 }
 

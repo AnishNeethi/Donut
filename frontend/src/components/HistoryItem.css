@@ -52,7 +52,7 @@
 
 .expand-btn {
   background: none;
-  border: 2px solid #000;
+  border: 2px solid rgba(0, 0, 0, 0.8);
   border-radius: 20px;
   padding: 8px 15px;
   font-size: 0.9rem;
@@ -61,7 +61,7 @@
 }
 
 .history-item:hover .expand-btn {
-  background-color: #000;
+  background-color: rgba(0, 0, 0, 0.8);
   color: #FFB6C1;
 }
 

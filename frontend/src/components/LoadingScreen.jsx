@@ -1,7 +1,7 @@
 import React from 'react';
 import './LoadingScreen.css';
 
-const LoadingScreen = ({ message = "Analyzing your food..." }) => {
+const LoadingScreen = ({ message = "analyzing your food..." }) => {
   return (
     <div className="loading-screen">
       <div className="loading-content">

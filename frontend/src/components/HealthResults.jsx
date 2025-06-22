@@ -40,12 +40,12 @@ const HealthResults = ({ analysisData, onSaveData }) => {
     const sodium = parseInt(nutritionData.sodium) || 0;
     const fat = parseInt(nutritionData.total_fat) || 0;
 
-    if (sugar > 15) concerns.push('High Sugar Content');
-    if (calories > 250) concerns.push('High Calorie Count');
-    if (sodium > 500) concerns.push('High Sodium');
-    if (fat > 15) concerns.push('High Fat Content');
+    if (sugar > 15) concerns.push('high sugar content');
+    if (calories > 250) concerns.push('high calorie count');
+    if (sodium > 500) concerns.push('high sodium');
+    if (fat > 15) concerns.push('high fat content');
     
-    return concerns.length > 0 ? concerns : ['No major health concerns'];
+    return concerns.length > 0 ? concerns : ['no major health concerns'];
   };
 
   const healthRating = calculateHealthRating();
@@ -54,25 +54,25 @@ const HealthResults = ({ analysisData, onSaveData }) => {
   const categories = [
     {
       id: 'nutrition',
-      title: 'Nutrition Facts',
+      title: 'nutrition facts',
       icon: '🍎',
       data: nutritionData
     },
     {
       id: 'health-rating',
-      title: 'Health Rating',
+      title: 'health rating',
       icon: '⭐',
-      data: { rating: healthRating, description: healthRating > 70 ? 'Good' : healthRating > 40 ? 'Moderate' : 'Poor' }
+      data: { rating: healthRating, description: healthRating > 70 ? 'good' : healthRating > 40 ? 'moderate' : 'poor' }
     },
     {
       id: 'health-concerns',
-      title: 'Health Concerns',
+      title: 'health concerns',
       icon: '⚠️',
       data: healthConcerns
     },
     {
       id: 'ingredients',
-      title: 'Ingredients',
+      title: 'ingredients',
       icon: '🧪',
       data: ingredients
     }
@@ -158,9 +158,9 @@ const HealthResults = ({ analysisData, onSaveData }) => {
       )}
 
       <div className="save-section">
-        <p className="save-prompt">Want to save this analysis to your health history?</p>
+        <p className="save-prompt">want to save this analysis to your health history?</p>
         <button className="save-btn" onClick={onSaveData}>
-          Save to Profile
+          save to profile
         </button>
       </div>
     </div>

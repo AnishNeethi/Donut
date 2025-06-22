@@ -48,7 +48,7 @@ const Landing = () => {
       
       // Use the same upload logic as AuthPage
       setLoading(true);
-      setMessage('Compressing image...');
+      setMessage('compressing image...');
 
       const options = {
         maxSizeMB: 0.07,
@@ -59,7 +59,7 @@ const Landing = () => {
 
       try {
         const compressedFile = await imageCompression(file, options);
-        setMessage('Uploading compressed image...');
+        setMessage('uploading compressed image...');
 
         const formData = new FormData();
         formData.append('file', compressedFile, file.name);
@@ -75,13 +75,13 @@ const Landing = () => {
           setAnalysisData(data);
           handleUploadComplete(data);
         } else {
-          setMessage(data.error || 'Upload failed');
-          handleUploadError(data.error || 'Upload failed');
+          setMessage(data.error || 'upload failed');
+          handleUploadError(data.error || 'upload failed');
         }
       } catch (error) {
         console.error('Compression or Upload Error:', error);
-        setMessage('An error occurred during compression or upload.');
-        handleUploadError('An error occurred during compression or upload.');
+        setMessage('an error occurred during compression or upload.');
+        handleUploadError('an error occurred during compression or upload.');
       } finally {
         setLoading(false);
       }
@@ -148,7 +148,7 @@ const Landing = () => {
             {/* Main Content - transition title to loading message */}
             <div className="main-content">
               <h1 className={`app-title title-to-loading ${titleFadeOut ? 'fade-out' : ''}`}>
-                {message || "Uploading compressed image..."}
+                {message || "uploading compressed image..."}
               </h1>
             </div>
           </>
@@ -163,10 +163,10 @@ const Landing = () => {
             />
             <div className="results-actions">
               <button className="action-btn" onClick={handleViewDonutScene}>
-                View Sugar Visualization
+                view sugar visualization
               </button>
               <button className="action-btn secondary" onClick={handleBackToHome}>
-                Analyze Another Food
+                analyze another food
               </button>
             </div>
           </div>
@@ -178,7 +178,7 @@ const Landing = () => {
              <DonutScene sugarCount={getSugarAmount()} />
              <div className="donut-overlay-info">
                <div className="sugar-info-floating">
-                 <h3>Sugar: {getSugarAmount()}g</h3>
+                 <h3>sugar: {getSugarAmount()}g</h3>
                  <p>{Math.ceil(getSugarAmount() / 5)} donuts falling!</p>
                </div>
              </div>
@@ -187,13 +187,13 @@ const Landing = () => {
              <div className="floating-action-panel">
                <div className="action-panel-content">
                  <button className="panel-btn primary" onClick={handleSaveData}>
-                   💾 Save Analysis
+                   💾 save analysis
                  </button>
                  <button className="panel-btn secondary" onClick={handleBackToHome}>
-                   📷 Analyze Another Food
+                   📷 analyze another food
                  </button>
                  <button className="panel-btn tertiary" onClick={() => setCurrentView('results')}>
-                   📊 View Detailed Results
+                   📊 view detailed results
                  </button>
                </div>
              </div>
