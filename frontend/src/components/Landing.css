@@ -207,6 +207,28 @@ body, html {
   }
 }
 
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUpCentered {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 /* Results Container */
 .results-container {
   width: 100%;
@@ -288,16 +310,16 @@ body, html {
   z-index: 11;
 }
 
-.donut-overlay-info {
+.food-title-header {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  right: 20px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
   z-index: 11;
   pointer-events: none;
+  animation: fadeInUpCentered 1s ease-out forwards;
+  opacity: 0;
 }
 
 .back-btn-floating {
@@ -320,28 +342,25 @@ body, html {
   color: rgba(0, 0, 0, 0.8);
 }
 
-.sugar-info-floating {
-  text-align: right;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 15px 20px;
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
+.food-name {
+  font-size: 4rem;
+  color: rgba(0, 0, 0, 0.9);
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  margin: 0 0 0 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 1s ease-out 0.2s forwards;
+  opacity: 0;
 }
 
-.sugar-info-floating h3 {
-  font-size: 1.3rem;
-  color: rgba(0, 0, 0, 0.8);
+.sugar-subtitle {
+  font-size: 1.5rem;
+  color: rgba(0, 0, 0, 0.7);
   font-family: Arial, sans-serif;
   font-weight: normal;
-  margin: 0 0 5px 0;
-}
-
-.sugar-info-floating p {
-  font-size: 0.9rem;
-  color: rgba(0, 0, 0, 0.8);
-  font-family: Arial, sans-serif;
   margin: 0;
-  opacity: 0.8;
+  animation: fadeInUp 1s ease-out 0.4s forwards;
+  opacity: 0;
 }
 
 /* Floating Action Panel */
@@ -351,6 +370,8 @@ body, html {
   left: 50%;
   transform: translateX(-50%);
   z-index: 11;
+  animation: fadeInUpCentered 1.2s ease-out 0.8s forwards;
+  opacity: 0;
 }
 
 .action-panel-content {
@@ -507,14 +528,16 @@ body, html {
     justify-content: center;
   }
 
-  .donut-overlay-info {
-    flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
+  .food-title-header {
+    top: 20px;
   }
 
-  .sugar-info-floating {
-    text-align: center;
+  .food-name {
+    font-size: 3rem;
+  }
+
+  .sugar-subtitle {
+    font-size: 1.2rem;
   }
 }
 
