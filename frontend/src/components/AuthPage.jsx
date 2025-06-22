@@ -565,7 +565,11 @@ const AuthPage = () => {
       )}
 
       {/* Sidebar */}
-      <Sidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <Sidebar 
+        isOpen={isMenuOpen} 
+        onClose={() => setIsMenuOpen(false)}
+        onHomeClick={() => {}} // Empty function since this page doesn't need custom home handling
+      />
 
       {/* Ingredient Popup */}
       {isIngredientPopupOpen && (
