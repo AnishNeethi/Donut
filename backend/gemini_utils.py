@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from google import genai
 from PIL import Image
 import io
-from fooddata_utils import search_fooddata_product
 import logging
 
 logger = logging.getLogger("gemini_utils")
@@ -30,13 +29,12 @@ def analyze_image(image_bytes: bytes):
         image = Image.open(io.BytesIO(image_bytes))
         logger.info(f"[ANALYSIS] Step 1 SUCCESS: Image loaded. Format: {image.format}, Size: {image.size}")
         
-        prompt = """
+        # Food analysis prompt
+        food_prompt = """
     Analyze this food image and return a JSON response with the following structure:
     {
         "food_name": "Name of the food item",
         "estimated_size": "estimated product size (100g, 100mL, etc.)",
-        "upc_code": "12-digit UPC code (make your best guess, must be exactly 12 digits)",
-        "upc_confidence": 0.85,
         "nutrition_data": {
             "calories": "estimated calories per serving",
             "protein": "protein content in grams",
@@ -55,54 +53,37 @@ def analyze_image(image_bytes: bytes):
         ]
     }
 
-    IMPORTANT RULES:
-    1. ALWAYS generate a UPC code - make your best guess based on the food type and brand if visible
-    2. UPC code must be exactly 12 digits (use 000000000000 if completely unsure)
-    3. UPC confidence must be a decimal between 0.0 and 1.0
-    4. If you can see a clear brand name or product, confidence should be 0.7 or higher
-    5. If the image is unclear or generic, confidence should be below 0.7
-    6. Make sure that the ingredients and values are based off of Ontario, Canada.
-    7. If you cannot determine certain values, use "unknown" for that field.
-
+    Please provide realistic estimates based on what you can see in the image.
+    Make sure that the ingredients and values are based off of Ontario, Canada.
+    If you cannot determine certain values, use "unknown" for that field.
+    
     Return only the JSON response, no additional text.
     """
 
-        logger.info("[ANALYSIS] Step 2: Sending request to Google Gemini API...")
-        response = client.models.generate_content(
-                model="gemini-2.5-flash-lite-preview-06-17", contents=[prompt, image]
+        logger.info("[ANALYSIS] Step 2: Sending request to Google Gemini API for food analysis...")
+        food_response = client.models.generate_content(
+                model="gemini-2.5-flash-lite-preview-06-17", contents=[food_prompt, image]
         )
-        logger.info("[ANALYSIS] Step 2 SUCCESS: Received response from Gemini.")
+        logger.info("[ANALYSIS] Step 2 SUCCESS: Received food analysis from Gemini.")
 
-        response_text = clean_response(response.text)
-        logger.info("[ANALYSIS] Step 3: Response content cleaned successfully.")
+        food_response_text = clean_response(food_response.text)
+        logger.info(f"[ANALYSIS DEBUG] Food analysis response: {food_response_text}")
 
         try:
-            result = json.loads(response_text)
-            logger.info("[ANALYSIS] Step 4 SUCCESS: JSON parsed. Analysis complete.")
+            result = json.loads(food_response_text)
+            logger.info("[ANALYSIS] Step 3 SUCCESS: Food analysis JSON parsed.")
             
             # Debug: Print the result structure
             logger.info(f"[ANALYSIS DEBUG] Result keys: {list(result.keys())}")
             logger.info(f"[ANALYSIS DEBUG] Food name: {result.get('food_name')}")
             logger.info(f"[ANALYSIS DEBUG] Estimated size: {result.get('estimated_size')}")
-            logger.info(f"[ANALYSIS DEBUG] UPC code: {result.get('upc_code')}")
-            logger.info(f"[ANALYSIS DEBUG] UPC confidence: {result.get('upc_confidence')}")
-            
-            # Check UPC confidence and conditionally search FoodData Central
-            upc_confidence = result.get("upc_confidence", 0.0)
-            if upc_confidence >= 0.7:
-                logger.info(f"[ANALYSIS] Step 5: UPC confidence {upc_confidence} >= 0.7, searching FoodData Central...")
-                if result.get("upc_code"):
-                    search_fooddata_product(result["upc_code"])
-                else:
-                    logger.info("[ANALYSIS] Step 5 SKIPPED: Missing UPC code in result")
-            else:
-                logger.info(f"[ANALYSIS] Step 5 SKIPPED: UPC confidence {upc_confidence} < 0.7, skipping FoodData Central search")
             
             logger.info("--- [END IMAGE ANALYSIS] ---\n")
             return result
+                
         except json.JSONDecodeError:
-            logger.warning("[ANALYSIS ERROR] Gemini returned malformed JSON.")
-            return {"raw_response": response_text}
+            logger.warning("[ANALYSIS ERROR] Food analysis returned malformed JSON.")
+            return {"raw_response": food_response_text}
 
     except Exception as e:
         logger.error(f"[ANALYSIS CRITICAL ERROR] An exception occurred: {e}")

@@ -22,7 +22,6 @@ if not exist ".env" (
     echo MONGO_URI=your_mongodb_connection_string_here > .env
     echo JWT_SECRET_KEY=your_jwt_secret_key_here >> .env
     echo GEMINI_API_KEY=your_gemini_api_key_here >> .env
-    echo FOODDATA_API_KEY=your_fooddata_api_key_here >> .env
     echo.
     echo Please edit .env file with your actual credentials before starting the server.
     pause

@@ -22,7 +22,6 @@ if (-not (Test-Path ".env")) {
 MONGO_URI=your_mongodb_connection_string_here
 JWT_SECRET_KEY=your_jwt_secret_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
-FOODDATA_API_KEY=your_fooddata_api_key_here
 "@ | Out-File -FilePath ".env" -Encoding UTF8
     
     Write-Host ""
