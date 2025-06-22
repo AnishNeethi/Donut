@@ -73,7 +73,12 @@ const Ground = () => {
     <RigidBody type="fixed">
       <mesh receiveShadow position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[20, 20]} />
-        <meshStandardMaterial color="#FFB6C1" />
+        <meshStandardMaterial 
+          color="#FFB6C1" 
+          emissive="#FFB6C1"
+          emissiveIntensity={0.4}
+          roughness={1.0}
+        />
       </mesh>
     </RigidBody>
   )

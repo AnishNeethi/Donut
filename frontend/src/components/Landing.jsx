@@ -190,25 +190,39 @@ const Landing = () => {
              case 'donut-scene':
          return (
            <div className="donut-scene-fullscreen">
-             <DonutScene sugarCount={getSugarAmount()} />
-             <div className="donut-overlay-info">
-               <div className="sugar-info-floating">
-                 <h3>sugar: {getSugarAmount()}g</h3>
-                 <p>{Math.ceil(getSugarAmount() / 10)} donuts falling!</p>
+             {/* Donut falling section */}
+             <div className="donut-falling-section">
+               <DonutScene sugarCount={getSugarAmount()} />
+               <div className="donut-overlay-info">
+                 <div className="sugar-info-floating">
+                   <h3>sugar: {getSugarAmount()}g</h3>
+                   <p>{Math.ceil(getSugarAmount() / 10)} donuts falling!</p>
+                 </div>
+               </div>
+               
+               {/* Floating Action Panel */}
+               <div className="floating-action-panel">
+                 <div className="action-panel-content">
+                   <button className="panel-btn tertiary" onClick={() => {
+                     document.getElementById('detailed-results-section').scrollIntoView({ 
+                       behavior: 'smooth' 
+                     });
+                   }}>
+                     📊 view detailed results
+                   </button>
+                 </div>
                </div>
              </div>
              
-             {/* Floating Action Panel */}
-             <div className="floating-action-panel">
-               <div className="action-panel-content">
-                 <button className="panel-btn primary" onClick={handleSaveData}>
-                   💾 save analysis
-                 </button>
-                 <button className="panel-btn secondary" onClick={handleBackToHome}>
-                   📷 analyze another food
-                 </button>
-                 <button className="panel-btn tertiary" onClick={() => setCurrentView('results')}>
-                   📊 view detailed results
+             {/* Detailed results section below */}
+             <div id="detailed-results-section" className="detailed-results-section">
+               <HealthResults
+                 analysisData={analysisData}
+                 onSaveData={handleSaveData}
+               />
+               <div className="results-actions">
+                 <button className="action-btn secondary" onClick={handleBackToHome}>
+                   analyze another food
                  </button>
                </div>
              </div>
