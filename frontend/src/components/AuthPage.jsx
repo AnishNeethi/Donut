@@ -20,7 +20,7 @@ const AuthPage = () => {
   const [timePeriod, setTimePeriod] = useState('7d'); // New state for time filter
   const [stats, setStats] = useState({ consumed: { calories: 0, sugar: 0 }, saved: { calories: 0, sugar: 0 } }); // New state for stats
 
-  const API_BASE = 'http://127.0.0.1:8000';
+  const API_BASE = 'https://donut-backend-o6ef.onrender.com';
 
   useEffect(() => {
     if (token) {
