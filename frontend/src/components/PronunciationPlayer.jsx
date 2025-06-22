@@ -67,10 +67,7 @@ const PronunciationPlayer = ({ ingredientName, healthRating }) => {
   };
 
   return (
-    <div className="pronunciation-player">
-      <div className="ingredient-info">
-        <span className="ingredient-name">{ingredientName}</span>
-      </div>
+    <>
       <button 
         className={`play-button ${isLoading ? 'loading' : ''} ${isPlaying ? 'playing' : ''}`} 
         onClick={handlePlayPause}
@@ -81,7 +78,7 @@ const PronunciationPlayer = ({ ingredientName, healthRating }) => {
         <span className="loading-spinner"></span>
       </button>
       <audio ref={audioRef} onEnded={handleAudioEnded} />
-    </div>
+    </>
   );
 };
 
